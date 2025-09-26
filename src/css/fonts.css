@@ -1,0 +1,71 @@
+@font-face {
+    font-family: 'Gotham';
+    font-style:normal;
+    font-weight: 400;
+    src: local("Gotham Book"),
+        local("Gotham-Book"),
+        url("../assets/fonts/gotham_book.woff2") format("woff2"),
+        url("../assets/fonts/gotham_book.woff") format("woff"),
+        url("../assets/fonts/gotham_book.eot") format("eot");
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Gotham';
+    font-style:normal;
+    font-weight: 500;
+    src: local("Gotham Medium"),
+        local("Gotham-Medium"),
+        url("../assets/fonts/gotham_medium.woff2") format("woff2"),
+        url("../assets/fonts/gotham_medium.woff") format("woff"),
+        url("../assets/fonts/gotham_medium.eot") format("eot");
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Gotham Light';
+    font-style: normal;
+    font-weight: 400;
+    src: local("Gotham Light Regular"),
+        local("Gotham-Light-Regular"),
+        url("../assets/fonts/Gotham Light.woff2") format("woff2"),
+        url("../assets/fonts/Gotham Light.woff") format("woff"),
+        url("../assets/fonts/Gotham Light.eot") format("eot");
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Object Sans';
+    font-style: normal;
+    font-weight: 400;
+    src: local("Object Sans Regular"),
+        local("Object-Sans-Regular"),
+        url("../assets/fonts/ObjectSans-Regular.woff2") format("woff2"),
+        url("../assets/fonts/ObjectSans-Regular.woff") format("woff"),
+        url("../assets/fonts/ObjectSans-Regular.eot") format("eot");
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    src: local("Inter Regular"),
+        local("Inter-Regular"),
+        url("../assets/fonts/Inter-Regular.woff2") format("woff2"),
+        url("../assets/fonts/Inter-Regular.woff") format("woff"),
+        url("../assets/fonts/Inter-Regular.eot") format("eot");
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    src: local("Inter Medium"),
+        local("Inter-Medium"),
+        url("../assets/fonts/Inter-Medium.woff2") format("woff2"),
+        url("../assets/fonts/Inter-Medium.woff") format("woff"),
+        url("../assets/fonts/Inter-Medium.eot") format("eot");
+    font-display: swap;
+}
