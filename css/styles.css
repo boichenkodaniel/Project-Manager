@@ -1,0 +1,245 @@
+body{
+    color:#FFF;
+    font-family: "Gotham",sans-serif;
+    font-weight: 400;
+}
+
+.wrapper{
+    height: 100%;
+    background: #1D232A;
+    display: flex;
+    padding: 10px;
+}
+
+.aside {
+    height: 100%;
+    border-radius: 15px;
+    background-color: #191E24;
+    padding: 10px;
+    width: 384px;
+    display: flex;
+    flex-direction: column;
+}
+
+.navigation {
+}
+
+.profile {
+    padding: 20px;
+    display: flex;
+    background: #15191e;
+    border-radius: 10px;
+    align-items: center;
+    column-gap: 23px;
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.profile::after{
+    content:"";
+    top: 35px;
+    right: 18px;
+    position: absolute;
+    background: url("../images/icons/collapse-nav.svg");
+    width: 16px;
+    height: 13px;
+}
+.profile__info {
+    display: flex;
+    flex-direction: column;
+    row-gap: 5px;
+}
+
+.profile__email {
+    font-size: 0.75rem;
+    color: #cfcfcf;
+}
+.navigation {
+}
+.nav-list, .projects-sub-list {
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+}
+.nav-item {
+    font-size: 1.12rem;
+}
+.nav-link,.project-link  {
+    padding: 13px 27px;
+    display: flex;
+    align-items: center;
+    border-radius: 10px;
+    column-gap: 23px;
+}
+
+.nav-link:hover, .project-link:hover {
+    background-color: #15191E;
+}
+.nav-link--active {
+    background-color: #15191E;
+}
+.nav-divider {
+    border: 1px solid #474747;  
+    margin-block: 20px;
+}
+
+.projects-sub-list {
+    margin-bottom: 40px;
+    margin-top: 6px;
+}
+.projects-sub-item {
+    margin-left: 12px;
+}
+.project-link {
+    position: relative;
+    padding: 16px 16px 16px 54px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.project-link::before {
+    content:"";
+    position: absolute;
+    top: 21px;
+    left: 27px;
+    background: url("../images/icons/project.svg");
+    width: 15px;
+    height: 11px;
+}
+.project__name {
+}
+.project__counter {
+    border-radius: 5px;
+    padding: 7px 10px;
+    font-size: 0.62rem;
+    background: #15191E;
+}
+
+.project-link:hover .project__counter{
+    background: #191E24;
+}
+.nav-button{
+    margin-top: auto;
+    height: 85px;
+    border-radius: 10px;
+    background-color: #15191E;
+}
+.main {
+    padding: 60px;
+}
+.main__header {
+}
+.logo {
+}
+.main__content {
+}
+.main__activities {
+}
+.main__activities-header {
+}
+.activity-list {
+}
+.activity-item {
+}
+.activity-item__icon-box {
+}
+.activity-item__icon {
+}
+.activity-item__info {
+}
+.activity-item__name {
+}
+.activity-item__description {
+}
+.activity-item__by {
+}
+.activity-item__by-icon-box {
+}
+.activity-item__by-icon {
+}
+.activity-item__by-worker {
+}
+.activity-item__to {
+}
+.activity-item__to-icon-box {
+}
+.activity-item__to-icon {
+}
+.activity-item__to-worker {
+}
+.action-menu {
+}
+.main__issues {
+}
+.main__issues-header {
+}
+.issues-list {
+}
+.issues-item {
+}
+.issues-item__icon-box {
+}
+.issues-item__icon {
+}
+.issues-item__info {
+}
+.issues-item__name {
+}
+.issues-item__description {
+}
+.issues-item__by {
+}
+.issues-item__by-icon-box {
+}
+.issues-item__by-icon {
+}
+.issues-item__by-worker {
+}
+.issues-item__project {
+}
+.issues-item__item__project-icon-box {
+}
+.issues-item__item__project-icon {
+}
+.issues-item__item__project-worker {
+}
+.main__stats {
+}
+.stats__total {
+}
+.total__tasks {
+}
+.total__tasks-number {
+}
+.total__tasks-text {
+}
+.total__users {
+}
+.total__users-number {
+}
+.total__users-text {
+}
+.total__projects {
+}
+.total__projects-number {
+}
+.total__projects-text {
+}
+.stats__task-report {
+}
+.task-report__header {
+}
+.task-report__period {
+}
+.task-report__graphics {
+}
+.task-report__compare {
+}
+.stats__issues-report {
+}
+.issues-report__header {
+}
+.issues-report__period {
+}
+.issues-report__graphics {
+}
