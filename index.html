@@ -328,33 +328,37 @@
         </div>
         <div class="main__stats">
           <div class="stats__total">
-            <div class="total__tasks">
-              <h2 class="total__tasks-number">125</h2>
-              <p class="total__tasks-text">Total Tasks</p>
+            <div class="total__item">
+              <h2 class="total__number">125</h2>
+              <p class="total__description">Total Tasks</p>
             </div>
-            <div class="total__users">
-              <h2 class="total__users-number">12</h2>
-              <p class="total__users-text">Total Users</p>
-            </div>
-            <div class="total__projects">
-              <h2 class="total__projects-number">44</h2>
-              <p class="total__projects-text">Total Projects</p>
-            </div>
+              <div class="total__item">
+                  <h2 class="total__number">125</h2>
+                  <p class="total__description">Total Tasks</p>
+              </div>
+              <div class="total__item">
+                  <h2 class="total__number">125</h2>
+                  <p class="total__description">Total Tasks</p>
+              </div>
           </div>
-          <div class="stats__task-report">
-            <h2 class="task-report__header">Task Finished Report</h2>
-            <p class="task-report__period">June - Week 3</p>
-            <div class="task-report__graphics">
-
-            </div>
-            <p class="task-report__compare">Performance up by 5.2% this Week</p>
+          <div class="stats__chart">
+              <div class="stats__chart__inner">
+                  <div class="chart__header">
+                      <h2 class="chart__title">Task Finished Report</h2>
+                      <p class="chart__period">June - Week 3</p>
+                  </div>
+                  <canvas class="chart__task" data-task-chart></canvas>
+              </div>
+            <p class="chart__compare">Performance up by 5.2% this Week</p>
           </div>
-          <div class="stats__issues-report">
-            <h2 class="issues-report__header">Issues Open Per Project</h2>
-            <p class="issues-report__period">June - Week 3</p>
-            <div class="issues-report__graphics">
-
-            </div>
+          <div class="stats__chart">
+              <div class="stats__char__inner">
+                  <div class="chart__header">
+                      <h2 class="chart__title">Issues Open Per Project</h2>
+                      <p class="chart__period">June - Week 3</p>
+                  </div>
+                  <canvas class="chart__issues" data-issues-chart></canvas>
+              </div>
           </div>
         </div>
       </div>

@@ -157,6 +157,7 @@ body{
 .main__content {
   display: grid;
   grid-template-columns: auto auto;
+    column-gap: 35px;
 }
 
 .main__content hr {
@@ -327,42 +328,73 @@ body{
 .issues-item__item__project-worker {
 }
 .main__stats {
+    display: flex;
+    flex-direction: column;
+    row-gap: 30px;
+    padding-block: 40px;
+
 }
 .stats__total {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    background-color: #191E24;
+    border-radius: 15px;
 }
-.total__tasks {
+.total__item {
+    padding: 20px;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    row-gap: 3px;
 }
-.total__tasks-number {
+.total__number {
+    font-size: 40px;
 }
-.total__tasks-text {
+.total__description {
+    font-size: 11px;
+    color: #B6B6B6;
 }
-.total__users {
+
+.stats__chart {
+    display: flex;
+    flex-direction: column;
+    row-gap: 25px;
+    background-color: #191E24;
+    border-radius: 15px;
+    padding: 20px;
 }
-.total__users-number {
+
+.stats__chart__inner {
+    display: flex;
+    flex-direction: column;
+    row-gap: 40px;
 }
-.total__users-text {
+
+.chart__header {
+    display: flex;
+    flex-direction: column;
+    row-gap: 6px;
 }
-.total__projects {
+
+.chart__task {
+    max-height: 150px;
+    max-width: 400px;
 }
-.total__projects-number {
+
+.chart__issues {
+    max-height: 150px;
+    max-width: 400px;
 }
-.total__projects-text {
+
+.chart__title {
+    font-size: 16px;
 }
-.stats__task-report {
+.chart__period {
+    font-size: 14px;
+    color: #B6B6B6;
 }
-.task-report__header {
-}
-.task-report__period {
-}
-.task-report__graphics {
-}
-.task-report__compare {
-}
-.stats__issues-report {
-}
-.issues-report__header {
-}
-.issues-report__period {
-}
-.issues-report__graphics {
+.chart__compare {
+    color: #B6B6B6;
+    font-size: 14px;
 }
