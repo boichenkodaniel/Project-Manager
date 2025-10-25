@@ -398,3 +398,65 @@ body{
     color: #B6B6B6;
     font-size: 14px;
 }
+
+.task__content {
+    padding-block: 40px;
+}
+
+.project__content {
+    display: grid;
+    padding-block: 40px;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: 20px;
+    row-gap: 20px;
+}
+
+.project__item {
+    display: flex;
+    flex-direction: column;
+    background-color: #212121;
+    padding: 20px;
+    border-radius: 10px;
+    row-gap: 10px;
+}
+
+.project__header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.project__title {
+    font-size: 24px;
+    color: #FFFFFF;
+}
+.project__description {
+    font-size: 12px;
+    color: #BFBFBF;
+}
+
+.project__actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    column-gap: 10px;
+}
+
+.project__actions-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    background-color: #282828;
+    padding: 7px;
+    border-radius: 5px;
+}
+
+.project__actions-name {
+    font-size: 10px;
+}
+
+.issues__content {
+    display: flex;
+    flex-direction: row;
+    row-gap: 10px;
+    padding-block: 40px;
+}
