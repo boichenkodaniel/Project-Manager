@@ -80,6 +80,7 @@ body{
 .nav-link--active {
   background-color: #15191E;
 }
+
 .nav-divider {
   border: 1px solid #474747;
   margin-block: 20px;
@@ -150,7 +151,7 @@ body{
   font-weight: 500;
 }
 .logo {
-  width: 36px;
+  width: 35px;
   height: 36px;
 }
 
@@ -211,7 +212,6 @@ body{
 .activity-item-inner{
   align-items: center;
   display: flex;
-  flex-direction: ;
   column-gap: 10px;
 }
 .activity-item__icon-box {
@@ -414,7 +414,7 @@ body{
 .project__item {
     display: flex;
     flex-direction: column;
-    background-color: #212121;
+    background-color: #191E24;
     padding: 20px;
     border-radius: 10px;
     row-gap: 10px;
@@ -445,7 +445,7 @@ body{
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    background-color: #282828;
+    background-color: #252c35;
     padding: 7px;
     border-radius: 5px;
 }
@@ -459,4 +459,45 @@ body{
     flex-direction: row;
     row-gap: 10px;
     padding-block: 40px;
+}
+
+
+.users-type{
+  font-weight: 500;
+  font-size: 1.25rem;
+  margin-block: 30px;
+}
+.admin-users,.employee-users,.client-users{
+  width: 100%;
+}
+.users-type {
+}
+.user-list {
+  display: flex;
+  gap: 11px 20px;
+  flex-wrap: wrap;
+}
+.user-item{
+  width: 23%;
+}
+.user-profile {
+  display: flex;
+  align-items: center;
+  padding: 15px 18px;
+  background-color:#191E24;
+  column-gap: 18px;
+  border-radius: 10px;
+}
+.user-profile__img-box {
+}
+.user-profile__img {
+}
+.user-profile__info {
+}
+.user-profile__name {
+}
+.user-profile__created {
+}
+.action-menu {
+  margin-left: auto;
 }
