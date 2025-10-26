@@ -4,21 +4,44 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 class ChartModule {
     constructor() {
         Chart.register(...registerables, ChartDataLabels);
+        this.taskChartInstance = null;
+        this.issuesChartInstance = null;
         this.initCharts();
     }
 
     initCharts() {
+        // Уничтожаем старые графики если они есть
+        if (this.taskChartInstance) {
+            this.taskChartInstance.destroy();
+        }
+        if (this.issuesChartInstance) {
+            this.issuesChartInstance.destroy();
+        }
+
         const taskCanvas = document.querySelector('[data-task-chart]');
         const issuesCanvas = document.querySelector('[data-issues-chart]');
 
+        console.log('Found task canvas:', taskCanvas);
+        console.log('Found issues canvas:', issuesCanvas);
+
         if (taskCanvas) {
-            this.taskCtx = taskCanvas.getContext('2d');
-            this.taskChart();
+            try {
+                this.taskCtx = taskCanvas.getContext('2d');
+                this.taskChartInstance = this.taskChart();
+                console.log('Task chart created successfully');
+            } catch (error) {
+                console.error('Error creating task chart:', error);
+            }
         }
 
         if (issuesCanvas) {
-            this.issuesCtx = issuesCanvas.getContext('2d');
-            this.issuesChart();
+            try {
+                this.issuesCtx = issuesCanvas.getContext('2d');
+                this.issuesChartInstance = this.issuesChart();
+                console.log('Issues chart created successfully');
+            } catch (error) {
+                console.error('Error creating issues chart:', error);
+            }
         }
     }
 
@@ -63,7 +86,7 @@ class ChartModule {
 
     taskChart() {
         const theme = this.darkTheme();
-        new Chart(this.taskCtx, {
+        return new Chart(this.taskCtx, {
             type: 'bar',
             data: {
                 labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
@@ -87,7 +110,7 @@ class ChartModule {
                     tooltip: {
                         ...theme.plugins.tooltip,
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 return `${context.dataset.label}: ${context.raw}`;
                             }
                         }
@@ -109,7 +132,7 @@ class ChartModule {
 
     issuesChart() {
         const theme = this.darkTheme();
-        new Chart(this.issuesCtx, {
+        return new Chart(this.issuesCtx, {
             type: 'bar',
             data: {
                 labels: ['Project 1', 'Project 2', 'Project 3', 'Project 4'],
@@ -134,7 +157,7 @@ class ChartModule {
                     tooltip: {
                         ...theme.plugins.tooltip,
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 return `${context.dataset.label}: ${context.raw}`;
                             }
                         }
@@ -148,7 +171,7 @@ class ChartModule {
                             size: 12
                         },
                         offset: 2,
-                        formatter: function(value) {
+                        formatter: function (value) {
                             return value;
                         }
                     }

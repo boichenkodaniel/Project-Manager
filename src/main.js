@@ -1,6 +1,6 @@
 import './style.css';
 import ChartModule from './modules/ChartModule';
-new ChartModule();
+let chartModule = null;
 
 const contentMap = {
   'dashboard': {
@@ -43,13 +43,18 @@ async function loadContent(page) {
     document.getElementById('content').innerHTML = content;
     document.getElementById('content').className = config.contentClass;
     document.getElementById('page_title').textContent = config.title;
+    document.querySelector('title').textContent = "Project manager - " + config.title;
 
     // Обновляем активную ссылку в навигации
     document.querySelectorAll('.nav-link').forEach(link => {
       link.classList.remove('nav-link--active');
     });
     document.querySelector(`[data-page="${page}"]`).classList.add('nav-link--active');
-
+    setTimeout(() => {
+      if (chartModule) {
+        chartModule.initCharts();
+      }
+    }, 100);
     // Обновляем URL без перезагрузки страницы
     history.pushState({ page }, '', `?page=${page}`);
   } catch (error) {
@@ -74,7 +79,12 @@ window.addEventListener('popstate', (event) => {
   }
 });
 
-// Загрузка начальной страницы
-const urlParams = new URLSearchParams(window.location.search);
-const initialPage = urlParams.get('page') || 'dashboard';
-loadContent(initialPage);
+document.addEventListener('DOMContentLoaded', () => {
+  // Создаем экземпляр ChartModule
+  chartModule = new ChartModule();
+
+  // Загрузка начальной страницы
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialPage = urlParams.get('page') || 'dashboard';
+  loadContent(initialPage);
+});
