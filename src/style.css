@@ -155,10 +155,13 @@ body{
   height: 36px;
 }
 
+#content{
+  width: 100%;
+}
 .main__content {
   display: grid;
   grid-template-columns: auto auto;
-    column-gap: 35px;
+  column-gap: 35px;
 }
 
 .main__content hr {
@@ -445,11 +448,16 @@ body{
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
     background-color: #252c35;
     padding: 7px;
     border-radius: 5px;
 }
-
+.project__actions-item img {
+  width: 10px;
+  height: 10px;
+  margin-right: 3px;
+}
 .project__actions-name {
     font-size: 10px;
 }
@@ -493,10 +501,15 @@ body{
 .user-profile__img {
 }
 .user-profile__info {
+  display: flex;
+  flex-direction: column;
+  row-gap: 5px;
 }
 .user-profile__name {
 }
 .user-profile__created {
+  font-size: 0.62rem;
+  color: #a8a8a8;
 }
 .action-menu {
   margin-left: auto;
