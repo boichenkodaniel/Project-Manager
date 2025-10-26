@@ -8,6 +8,7 @@ export default defineConfig({
                 tasks: './tasks.html',
                 projects: './projects.html',
                 issues: './issues.html',
+                users: './users.html',
             }
         }
     },
