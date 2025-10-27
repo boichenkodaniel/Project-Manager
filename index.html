@@ -2,109 +2,362 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{{page_title}} - Project Manager</title>
-  <script type="module" src="/src/main.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Project Manager</title>
+    <script type="module" src="/src/main.js"></script>
 </head>
 
 <body>
-  <div class="wrapper">
+<div class="wrapper">
     <aside class="aside">
-      <div class="profile">
-        <div class="profile__img-box">
-          <img src="src/assets/icons/profile.svg" alt="Profile photo" class="profile__img">
+        <div class="profile">
+            <div class="profile__img-box">
+                <img src="src/assets/icons/profile.svg" alt="Profile photo" class="profile__img">
+            </div>
+            <div class="profile__info">
+                <h2 class="profile__name">Bhargav Joshi & Team</h2>
+                <p class="profile__email">bhargavjoshi1237@gmail.com</p>
+            </div>
         </div>
-        <div class="profile__info">
-          <h2 class="profile__name">Bhargav Joshi & Team</h2>
-          <p class="profile__email">bhargavjoshi1237@gmail.com</p>
-        </div>
-      </div>
-      <nav class="navigation">
-        <ul class="nav-list">
-          <li class="nav-item">
-            <a href="index.html" class="nav-link" data-page="dashboard">
-              <img src="src/assets/icons/dashboard.svg" alt="" loading="lazy" />
-              <p>Dashboard</p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="tasks.html" class="nav-link" data-page="tasks">
-              <img src="src/assets/icons/tasks.svg" alt="" loading="lazy" />
-              <p>Tasks</p>
-            </a>
-          </li>
-        </ul>
-      </nav>
-
-      <hr class="nav-divider" />
-
-      <section class="projects-section">
         <nav class="navigation">
-          <ul class="nav-list">
-            <li class="nav-item">
-              <a href="projects.html" class="nav-link" data-page="projects">
-                <img src="src/assets/icons/all-projects.svg" alt="" loading="lazy" />
-                <p>All Projects</p>
-              </a>
-            </li>
-          </ul>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="#dashboard" class="nav-link nav-link--active">
+                        <img src="src/assets/icons/dashboard.svg" alt="" loading="lazy" />
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="tasks.html" class="nav-link">
+                        <img src="src/assets/icons/tasks.svg" alt="" loading="lazy" />
+                        <p>Tasks</p>
+                    </a>
+                </li>
+            </ul>
         </nav>
-        <ul class="projects-sub-list">
-          <li class="projects-sub-item">
-            <a href="#project-1" class="project-link">
-              <p class="project__name">Project 1</p>
-              <p class="project__counter">45</p>
-            </a>
-          </li>
-          <li class="projects-sub-item">
-            <a href="#project-2" class="project-link">
-              <p class="project__name">Project 2</p>
-              <p class="project__counter">145</p>
-            </a>
-          </li>
-          <li class="projects-sub-item">
-            <a href="#project-3" class="project-link">
-              <p class="project__name">Project 3</p>
-              <p class="project__counter">12</p>
-            </a>
-          </li>
-        </ul>
-      </section>
 
-      <hr class="nav-divider" />
+        <hr class="nav-divider" />
 
-      <nav class="navigation">
-        <ul class="nav-list">
-          <li class="nav-item">
-            <a href="users.html" class="nav-link">
-              <img src="src/assets/icons/users.svg" alt="" loading="lazy"/>
-              <p>All Users</p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="issues.html" class="nav-link" data-page="issues">
-              <img src="src/assets/icons/issues.svg" alt="" loading="lazy" />
-              <p>Issues</p>
-            </a>
-          </li>
-        </ul>
-      </nav>
-      <button class="nav-button">
-        <img src="src/assets/icons/plus.svg" alt="" loading="lazy" />
-      </button>
+        <section class="projects-section">
+            <nav class="navigation">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="projects.html" class="nav-link">
+                            <img src="src/assets/icons/all-projects.svg" alt="" loading="lazy" />
+                            <p>All Projects</p>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <ul class="projects-sub-list">
+                <li class="projects-sub-item">
+                    <a href="#project-1" class="project-link">
+                        <p class="project__name">Project 1</p>
+                        <p class="project__counter">45</p>
+                    </a>
+                </li>
+                <li class="projects-sub-item">
+                    <a href="#project-2" class="project-link">
+                        <p class="project__name">Project 2</p>
+                        <p class="project__counter">145</p>
+                    </a>
+                </li>
+                <li class="projects-sub-item">
+                    <a href="#project-3" class="project-link">
+                        <p class="project__name">Project 3</p>
+                        <p class="project__counter">12</p>
+                    </a>
+                </li>
+            </ul>
+        </section>
+
+        <hr class="nav-divider" />
+
+        <nav class="navigation">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="users.html" class="nav-link">
+                        <img src="src/assets/icons/users.svg" alt="" loading="lazy" />
+                        <p>All Users</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="issues.html" class="nav-link">
+                        <img src="src/assets/icons/issues.svg" alt="" loading="lazy" />
+                        <p>Issues</p>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <button class="nav-button">
+            <img src="src/assets/icons/plus.svg" alt="" loading="lazy" />
+        </button>
     </aside>
     <main class="main">
-      <header class="main__header">
-        <h1 id="page_title">{{page_title}}</h1>
-        <img class="logo" src="src/assets/icons/logo.svg" alt="" loading="lazy" />
-      </header>
-      <hr />
-      <div id="content" class="{{content_class}}">
-        {{{content}}}
-      </div>
+        <header class="main__header">
+            <h1>Dashboard</h1>
+            <img class="logo" src="src/assets/icons/logo.svg" alt="" width="" height="" loading="lazy" />
+        </header>
+        <hr />
+        <div class="content">
+            <div class="main__content">
+                <div class="main__content--inner">
+                    <div class="main__activities">
+                        <div class="main__activities-header">
+                            <h2>Recent Activity</h2>
+                        </div>
+                        <ul class="activity-list">
+                            <li class="activity-item">
+                                <div class="activity-item-inner">
+                                    <div class="activity-item__icon-box">
+                                        <div class="activity-item__icon">
+                                            <img src="src/assets/icons/complete-task.svg" alt="" width="25" height="23" loading="lazy" />
+                                        </div>
+                                    </div>
+                                    <div class="activity-item__info">
+                                        <h3 class="activity-item__name">New Task Added</h3>
+                                        <p class="activity-item__description">New Task added for Project 03 for the deadline
+                                            14 Jun 25</p>
+                                    </div>
+                                </div>
+                                <div class="activity-item-last">
+                                    <div class="activity-item-last__content">
+                                        <div class="activity-item__by">
+                                            <div class="activity-item__by-icon-box">
+                                                <img src="src/assets/icons/by.svg" alt="" class="activity-item__by-icon" />
+                                            </div>
+                                            <p class="activity-item__by-worker">By Jason Stew</p>
+                                        </div>
+                                        <div class="activity-item__to">
+                                            <div class="activity-item__to-icon-box">
+                                                <img src="src/assets/icons/to.svg" alt="" class="activity-item__to-icon" />
+                                            </div>
+                                            <p class="activity-item__to-worker">To John Doe</p>
+                                        </div>
+                                    </div>
+                                    <div class="action-menu">
+                                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="activity-item">
+                                <div class="activity-item-inner">
+                                    <div class="activity-item__icon-box">
+                                        <div class="activity-item__icon">
+                                            <img src="src/assets/icons/complete-task.svg" alt="" width="25" height="23" loading="lazy" />
+                                        </div>
+                                    </div>
+                                    <div class="activity-item__info">
+                                        <h3 class="activity-item__name">Task Completed</h3>
+                                        <p class="activity-item__description">Task Marked as complete for project 1</p>
+                                    </div>
+                                </div>
+                                <div class="activity-item-last">
+                                    <div class="activity-item-last">
+                                        <div class="activity-item-last__content">
+                                            <div class="activity-item__by">
+                                                <div class="activity-item__by-icon-box">
+                                                    <img src="src/assets/icons/by.svg" alt="" class="activity-item__by-icon" />
+                                                </div>
+                                                <p class="activity-item__by-worker">By Jason Stew</p>
+                                            </div>
+                                            <div class="activity-item__to">
+                                                <div class="activity-item__to-icon-box">
+                                                    <img src="src/assets/icons/to.svg" alt="" class="activity-item__to-icon" />
+                                                </div>
+                                                <p class="activity-item__to-worker">To John Doe</p>
+                                            </div>
+                                        </div>
+                                        <div class="action-menu">
+                                            <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                        </div>
+                                    </div>
+                            </li>
+                            <li class="activity-item">
+                                <div class="activity-item-inner">
+                                    <div class="activity-item__icon-box">
+                                        <div class="activity-item__icon">
+                                            <img src="src/assets/icons/complete-task.svg" alt="" width="25" height="23" loading="lazy" />
+                                        </div>
+                                    </div>
+                                    <div class="activity-item__info">
+                                        <h3 class="activity-item__name">Task Completed</h3>
+                                        <p class="activity-item__description">Task Marked as complete for project 1</p>
+                                    </div>
+                                </div>
+                                <div class="activity-item-last">
+                                    <div class="activity-item-last">
+                                        <div class="activity-item-last__content">
+                                            <div class="activity-item__by">
+                                                <div class="activity-item__by-icon-box">
+                                                    <img src="src/assets/icons/by.svg" alt="" class="activity-item__by-icon" />
+                                                </div>
+                                                <p class="activity-item__by-worker">By Jason Stew</p>
+                                            </div>
+                                            <div class="activity-item__to">
+                                                <div class="activity-item__to-icon-box">
+                                                    <img src="src/assets/icons/to.svg" alt="" class="activity-item__to-icon" />
+                                                </div>
+                                                <p class="activity-item__to-worker">To John Doe</p>
+                                            </div>
+                                        </div>
+                                        <div class="action-menu">
+                                            <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                        </div>
+                                    </div>
+                            </li>
+                            <li class="activity-item">
+                                <div class="activity-item-inner">
+                                    <div class="activity-item__icon-box">
+                                        <div class="activity-item__icon">
+                                            <img src="src/assets/icons/complete-task.svg" alt="" width="25" height="23" loading="lazy" />
+                                        </div>
+                                    </div>
+                                    <div class="activity-item__info">
+                                        <h3 class="activity-item__name">Task Completed</h3>
+                                        <p class="activity-item__description">Task Marked as complete for project 1</p>
+                                    </div>
+                                </div>
+                                <div class="activity-item-last">
+                                    <div class="activity-item-last">
+                                        <div class="activity-item-last__content">
+                                            <div class="activity-item__by">
+                                                <div class="activity-item__by-icon-box">
+                                                    <img src="src/assets/icons/by.svg" alt="" class="activity-item__by-icon" />
+                                                </div>
+                                                <p class="activity-item__by-worker">By Jason Stew</p>
+                                            </div>
+                                            <div class="activity-item__to">
+                                                <div class="activity-item__to-icon-box">
+                                                    <img src="src/assets/icons/to.svg" alt="" class="activity-item__to-icon" />
+                                                </div>
+                                                <p class="activity-item__to-worker">To John Doe</p>
+                                            </div>
+                                        </div>
+                                        <div class="action-menu">
+                                            <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                        </div>
+                                    </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <hr />
+                    <div class="main__activities">
+                        <div class="main__activities-header">
+                            <h2>Top Issues</h2>
+                        </div>
+                        <ul class="activity-list">
+                            <li class="activity-item">
+                                <div class="activity-item-inner">
+                                    <div class="activity-item__icon-box">
+                                        <div class="activity-item__icon">
+                                            <img src="src/assets/icons/issue.svg" alt="" width="25" height="23" loading="lazy" />
+                                        </div>
+                                    </div>
+                                    <div class="activity-item__info">
+                                        <h3 class="activity-item__name">New Task Added</h3>
+                                        <p class="activity-item__description">New Task added for Project 03 for the deadline
+                                            14 Jun 25</p>
+                                    </div>
+                                </div>
+                                <div class="activity-item-last">
+                                    <div class="activity-item-last__content">
+                                        <div class="activity-item__by">
+                                            <div class="activity-item__by-icon-box">
+                                                <img src="src/assets/icons/by.svg" alt="" class="activity-item__by-icon" />
+                                            </div>
+                                            <p class="activity-item__by-worker">By Jason Stew</p>
+                                        </div>
+                                        <div class="activity-item__to">
+                                            <div class="activity-item__to-icon-box">
+                                                <img src="src/assets/icons/all-projects.svg" alt="" class="issues-item__item__project-icon"
+                                                     width="19" height="6" />
+                                            </div>
+                                            <p class="activity-item__to-worker">To John Doe</p>
+                                        </div>
+                                    </div>
+                                    <div class="action-menu">
+                                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="activity-item">
+                                <div class="activity-item-inner">
+                                    <div class="activity-item__icon-box">
+                                        <div class="activity-item__icon">
+                                            <img src="src/assets/icons/issue.svg" alt="" width="25" height="23" loading="lazy" />
+                                        </div>
+                                    </div>
+                                    <div class="activity-item__info">
+                                        <h3 class="activity-item__name">Task Completed</h3>
+                                        <p class="activity-item__description">Task Marked as complete for project 1</p>
+                                    </div>
+                                </div>
+                                <div class="activity-item-last">
+                                    <div class="activity-item-last">
+                                        <div class="activity-item-last__content">
+                                            <div class="activity-item__by">
+                                                <div class="activity-item__by-icon-box">
+                                                    <img src="src/assets/icons/by.svg" alt="" class="activity-item__by-icon" />
+                                                </div>
+                                                <p class="activity-item__by-worker">By Jason Stew</p>
+                                            </div>
+                                            <div class="activity-item__to">
+                                                <div class="activity-item__to-icon-box">
+                                                    <img src="src/assets/icons/all-projects.svg" alt="" class="issues-item__item__project-icon"
+                                                         width="19" height="6" />
+                                                </div>
+                                                <p class="activity-item__to-worker">To John Doe</p>
+                                            </div>
+                                        </div>
+                                        <div class="action-menu">
+                                            <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                        </div>
+                                    </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="main__stats">
+                    <div class="stats__total">
+                        <div class="total__item">
+                            <h2 class="total__number">125</h2>
+                            <p class="total__description">Total Tasks</p>
+                        </div>
+                        <div class="total__item">
+                            <h2 class="total__number">125</h2>
+                            <p class="total__description">Total Tasks</p>
+                        </div>
+                        <div class="total__item">
+                            <h2 class="total__number">125</h2>
+                            <p class="total__description">Total Tasks</p>
+                        </div>
+                    </div>
+                    <div class="stats__chart">
+                        <div class="stats__chart__inner">
+                            <div class="chart__header">
+                                <h2 class="chart__title">Task Finished Report</h2>
+                                <p class="chart__period">June - Week 3</p>
+                            </div>
+                            <canvas class="chart__task" data-task-chart></canvas>
+                        </div>
+                        <p class="chart__compare">Performance up by 5.2% this Week</p>
+                    </div>
+                    <div class="stats__chart">
+                        <div class="stats__char__inner">
+                            <div class="chart__header">
+                                <h2 class="chart__title">Issues Open Per Project</h2>
+                                <p class="chart__period">June - Week 3</p>
+                            </div>
+                            <canvas class="chart__issues" data-issues-chart></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
-  </div>
+</div>
 </body>
 
 </html>
