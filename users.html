@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tasks - Project Manager</title>
+    <script type="module" src="/src/main.js"></script>
+</head>
+<body>
+<div class="wrapper">
+    <aside class="aside">
+        <!-- Тот же сайдбар что и в index.html -->
+        <div class="profile">
+            <div class="profile__img-box">
+                <img src="src/assets/icons/profile.svg" alt="Profile photo" class="profile__img">
+            </div>
+            <div class="profile__info">
+                <h2 class="profile__name">Bhargav Joshi & Team</h2>
+                <p class="profile__email">bhargavjoshi1237@gmail.com</p>
+            </div>
+        </div>
+        <nav class="navigation">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">
+                        <img src="src/assets/icons/dashboard.svg" alt="" loading="lazy"/>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="task.html" class="nav-link nav-link--active">
+                        <img src="src/assets/icons/tasks.svg" alt="" loading="lazy"/>
+                        <p>Tasks</p>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Остальной сайдбар как в index.html -->
+        <hr class="nav-divider"/>
+
+        <section class="projects-section">
+            <nav class="navigation">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="projects.html" class="nav-link">
+                            <img src="src/assets/icons/all-projects.svg" alt="" loading="lazy" />
+                            <p>All Projects</p>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <ul class="projects-sub-list">
+                <li class="projects-sub-item">
+                    <a href="#project-1" class="project-link">
+                        <p class="project__name">Project 1</p>
+                        <p class="project__counter">45</p>
+                    </a>
+                </li>
+                <li class="projects-sub-item">
+                    <a href="#project-2" class="project-link">
+                        <p class="project__name">Project 2</p>
+                        <p class="project__counter">145</p>
+                    </a>
+                </li>
+                <li class="projects-sub-item">
+                    <a href="#project-3" class="project-link">
+                        <p class="project__name">Project 3</p>
+                        <p class="project__counter">12</p>
+                    </a>
+                </li>
+            </ul>
+        </section>
+
+        <hr class="nav-divider"/>
+
+        <nav class="navigation">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="users.html" class="nav-link">
+                        <img src="src/assets/icons/users.svg" alt="" loading="lazy"/>
+                        <p>All Users</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="issues.html" class="nav-link">
+                        <img src="src/assets/icons/issues.svg" alt="" loading="lazy"/>
+                        <p>Issues</p>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <button class="nav-button">
+            <img src="src/assets/icons/plus.svg" alt="" loading="lazy"/>
+        </button>
+    </aside>
+    <main class="main">
+        <header class="main__header">
+            <h1>Users</h1>
+            <img class="logo" src="src/assets/icons/logo.svg" alt="" loading="lazy" />
+        </header>
+        <hr />
+        <div class="user__content">
+            <div class="main__activities">
+                <div class="admin-users">
+                    <h2 class="users-type">Admin users</h2>
+                    <ul class="user-list">
+                        <li class="user-item">
+                            <div class="user-item-inner">
+                                <div class="user-profile">
+                                    <div class="user-profile__img-box">
+                                        <img src="src/assets/icons/profile.svg" alt="Profile photo" class="user-profile__img">
+                                    </div>
+                                    <div class="user-profile__info">
+                                        <h2 class="user-profile__name">Tommy Fury</h2>
+                                        <p class="user-profile__created">Created: 12 Jan 25</p>
+                                    </div>
+                                    <div class="action-menu">
+                                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="user-item">
+                            <div class="user-item-inner">
+                                <div class="user-profile">
+                                    <div class="user-profile__img-box">
+                                        <img src="src/assets/icons/profile.svg" alt="Profile photo" class="user-profile__img">
+                                    </div>
+                                    <div class="user-profile__info">
+                                        <h2 class="user-profile__name">Tommy Fury</h2>
+                                        <p class="user-profile__created">Created: 12 Jan 25</p>
+                                    </div>
+                                    <div class="action-menu">
+                                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="user-item">
+                            <div class="user-item-inner">
+                                <div class="user-profile">
+                                    <div class="user-profile__img-box">
+                                        <img src="src/assets/icons/profile.svg" alt="Profile photo" class="user-profile__img">
+                                    </div>
+                                    <div class="user-profile__info">
+                                        <h2 class="user-profile__name">Tommy Fury</h2>
+                                        <p class="user-profile__created">Created: 12 Jan 25</p>
+                                    </div>
+                                    <div class="action-menu">
+                                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <hr />
+                <div class="employee-users">
+                    <h2 class="users-type">Employee users</h2>
+                    <ul class="user-list">
+                        <li class="user-item">
+                            <div class="user-item-inner">
+                                <div class="user-profile">
+                                    <div class="user-profile__img-box">
+                                        <img src="src/assets/icons/profile.svg" alt="Profile photo" class="user-profile__img">
+                                    </div>
+                                    <div class="user-profile__info">
+                                        <h2 class="user-profile__name">Tommy Fury</h2>
+                                        <p class="user-profile__created">Created: 12 Jan 25</p>
+                                    </div>
+                                    <div class="action-menu">
+                                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="user-item">
+                            <div class="user-item-inner">
+                                <div class="user-profile">
+                                    <div class="user-profile__img-box">
+                                        <img src="src/assets/icons/profile.svg" alt="Profile photo" class="user-profile__img">
+                                    </div>
+                                    <div class="user-profile__info">
+                                        <h2 class="user-profile__name">Tommy Fury</h2>
+                                        <p class="user-profile__created">Created: 12 Jan 25</p>
+                                    </div>
+                                    <div class="action-menu">
+                                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="user-item">
+                            <div class="user-item-inner">
+                                <div class="user-profile">
+                                    <div class="user-profile__img-box">
+                                        <img src="src/assets/icons/profile.svg" alt="Profile photo" class="user-profile__img">
+                                    </div>
+                                    <div class="user-profile__info">
+                                        <h2 class="user-profile__name">Tommy Fury</h2>
+                                        <p class="user-profile__created">Created: 12 Jan 25</p>
+                                    </div>
+                                    <div class="action-menu">
+                                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="user-item">
+                            <div class="user-item-inner">
+                                <div class="user-profile">
+                                    <div class="user-profile__img-box">
+                                        <img src="src/assets/icons/profile.svg" alt="Profile photo" class="user-profile__img">
+                                    </div>
+                                    <div class="user-profile__info">
+                                        <h2 class="user-profile__name">Tommy Fury</h2>
+                                        <p class="user-profile__created">Created: 12 Jan 25</p>
+                                    </div>
+                                    <div class="action-menu">
+                                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="user-item">
+                            <div class="user-item-inner">
+                                <div class="user-profile">
+                                    <div class="user-profile__img-box">
+                                        <img src="src/assets/icons/profile.svg" alt="Profile photo" class="user-profile__img">
+                                    </div>
+                                    <div class="user-profile__info">
+                                        <h2 class="user-profile__name">Tommy Fury</h2>
+                                        <p class="user-profile__created">Created: 12 Jan 25</p>
+                                    </div>
+                                    <div class="action-menu">
+                                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="user-item">
+                            <div class="user-item-inner">
+                                <div class="user-profile">
+                                    <div class="user-profile__img-box">
+                                        <img src="src/assets/icons/profile.svg" alt="Profile photo" class="user-profile__img">
+                                    </div>
+                                    <div class="user-profile__info">
+                                        <h2 class="user-profile__name">Tommy Fury</h2>
+                                        <p class="user-profile__created">Created: 12 Jan 25</p>
+                                    </div>
+                                    <div class="action-menu">
+                                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="user-item">
+                            <div class="user-item-inner">
+                                <div class="user-profile">
+                                    <div class="user-profile__img-box">
+                                        <img src="src/assets/icons/profile.svg" alt="Profile photo" class="user-profile__img">
+                                    </div>
+                                    <div class="user-profile__info">
+                                        <h2 class="user-profile__name">Tommy Fury</h2>
+                                        <p class="user-profile__created">Created: 12 Jan 25</p>
+                                    </div>
+                                    <div class="action-menu">
+                                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="user-item">
+                            <div class="user-item-inner">
+                                <div class="user-profile">
+                                    <div class="user-profile__img-box">
+                                        <img src="src/assets/icons/profile.svg" alt="Profile photo" class="user-profile__img">
+                                    </div>
+                                    <div class="user-profile__info">
+                                        <h2 class="user-profile__name">Tommy Fury</h2>
+                                        <p class="user-profile__created">Created: 12 Jan 25</p>
+                                    </div>
+                                    <div class="action-menu">
+                                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="user-item">
+                            <div class="user-item-inner">
+                                <div class="user-profile">
+                                    <div class="user-profile__img-box">
+                                        <img src="src/assets/icons/profile.svg" alt="Profile photo" class="user-profile__img">
+                                    </div>
+                                    <div class="user-profile__info">
+                                        <h2 class="user-profile__name">Tommy Fury</h2>
+                                        <p class="user-profile__created">Created: 12 Jan 25</p>
+                                    </div>
+                                    <div class="action-menu">
+                                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="user-item">
+                            <div class="user-item-inner">
+                                <div class="user-profile">
+                                    <div class="user-profile__img-box">
+                                        <img src="src/assets/icons/profile.svg" alt="Profile photo" class="user-profile__img">
+                                    </div>
+                                    <div class="user-profile__info">
+                                        <h2 class="user-profile__name">Tommy Fury</h2>
+                                        <p class="user-profile__created">Created: 12 Jan 25</p>
+                                    </div>
+                                    <div class="action-menu">
+                                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="user-item">
+                            <div class="user-item-inner">
+                                <div class="user-profile">
+                                    <div class="user-profile__img-box">
+                                        <img src="src/assets/icons/profile.svg" alt="Profile photo" class="user-profile__img">
+                                    </div>
+                                    <div class="user-profile__info">
+                                        <h2 class="user-profile__name">Tommy Fury</h2>
+                                        <p class="user-profile__created">Created: 12 Jan 25</p>
+                                    </div>
+                                    <div class="action-menu">
+                                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="user-item">
+                            <div class="user-item-inner">
+                                <div class="user-profile">
+                                    <div class="user-profile__img-box">
+                                        <img src="src/assets/icons/profile.svg" alt="Profile photo" class="user-profile__img">
+                                    </div>
+                                    <div class="user-profile__info">
+                                        <h2 class="user-profile__name">Tommy Fury</h2>
+                                        <p class="user-profile__created">Created: 12 Jan 25</p>
+                                    </div>
+                                    <div class="action-menu">
+                                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="user-item">
+                            <div class="user-item-inner">
+                                <div class="user-profile">
+                                    <div class="user-profile__img-box">
+                                        <img src="src/assets/icons/profile.svg" alt="Profile photo" class="user-profile__img">
+                                    </div>
+                                    <div class="user-profile__info">
+                                        <h2 class="user-profile__name">Tommy Fury</h2>
+                                        <p class="user-profile__created">Created: 12 Jan 25</p>
+                                    </div>
+                                    <div class="action-menu">
+                                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+
+                    </ul>
+                </div>
+                <hr />
+                <div class="client-users">
+                    <h2 class="users-type">Client users</h2>
+                    <ul class="user-list">
+                        <li class="user-item">
+                            <div class="user-item-inner">
+                                <div class="user-profile">
+                                    <div class="user-profile__img-box">
+                                        <img src="src/assets/icons/profile.svg" alt="Profile photo" class="user-profile__img">
+                                    </div>
+                                    <div class="user-profile__info">
+                                        <h2 class="user-profile__name">Tommy Fury</h2>
+                                        <p class="user-profile__created">Created: 12 Jan 25</p>
+                                    </div>
+                                    <div class="action-menu">
+                                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="user-item">
+                            <div class="user-item-inner">
+                                <div class="user-profile">
+                                    <div class="user-profile__img-box">
+                                        <img src="src/assets/icons/profile.svg" alt="Profile photo" class="user-profile__img">
+                                    </div>
+                                    <div class="user-profile__info">
+                                        <h2 class="user-profile__name">Tommy Fury</h2>
+                                        <p class="user-profile__created">Created: 12 Jan 25</p>
+                                    </div>
+                                    <div class="action-menu">
+                                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="user-item">
+                            <div class="user-item-inner">
+                                <div class="user-profile">
+                                    <div class="user-profile__img-box">
+                                        <img src="src/assets/icons/profile.svg" alt="Profile photo" class="user-profile__img">
+                                    </div>
+                                    <div class="user-profile__info">
+                                        <h2 class="user-profile__name">Tommy Fury</h2>
+                                        <p class="user-profile__created">Created: 12 Jan 25</p>
+                                    </div>
+                                    <div class="action-menu">
+                                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="user-item">
+                            <div class="user-item-inner">
+                                <div class="user-profile">
+                                    <div class="user-profile__img-box">
+                                        <img src="src/assets/icons/profile.svg" alt="Profile photo" class="user-profile__img">
+                                    </div>
+                                    <div class="user-profile__info">
+                                        <h2 class="user-profile__name">Tommy Fury</h2>
+                                        <p class="user-profile__created">Created: 12 Jan 25</p>
+                                    </div>
+                                    <div class="action-menu">
+                                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>
