@@ -5,7 +5,7 @@ body{
   color:#FFF;
   font-family: "Gotham",sans-serif;
   font-weight: 400;
-}
+}  
 
 .wrapper{
   background: #1D232A;
@@ -46,6 +46,7 @@ body{
   width: 16px;
   height: 13px;
 }
+
 .profile__info {
   display: flex;
   flex-direction: column;
