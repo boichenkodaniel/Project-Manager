@@ -6,15 +6,11 @@ class Issue {
         dataByWorker: "[data-issue-by-worker]",
         dataToWorker: "[data-issue-to-worker]",
         dataIssueContainer: "[data-issue-container]",
+        dataIssueContainerInDashboard: "[data-issue-container-in-dashboard]",
+        dataTemplateInDashboard: "[data-issue-template-in-dashboard]",
     };
 
     issueList = [
-        {
-            name: 'New issue Added',
-            description: 'New issue added for Project 03 for the deadline 14 Jun 25',
-            byWorker: 'By Jason Stew',
-            toWorker: 'To John Doe',
-        },
         {
             name: 'New issue Added',
             description: 'New issue added for Project 03 for the deadline 14 Jun 25',
@@ -43,16 +39,28 @@ class Issue {
 
     constructor() {
         this.render();
+        this.renderInDashboard();
     }
 
     render() {
+        const issueContainer = document.querySelector(this.root.dataIssueContainerInDashboard);
+        const template = document.querySelector(this.root.dataTemplateInDashboard);
+
+        // Проверяем существование элементов
+        if (!issueContainer || !template) return;
+
+        this.issueList.slice(-3).forEach(issue => {
+            const issueElement = this.createIssueLayout(issue, template);
+            issueContainer.appendChild(issueElement);
+        });
+    }
+
+    renderInDashboard() {
         const issueContainer = document.querySelector(this.root.dataIssueContainer);
         const template = document.querySelector(this.root.dataTemplate);
 
-        if (!issueContainer || !template) {
-            console.error('Missing required DOM elements');
-            return;
-        }
+        // Проверяем существование элементов
+        if (!issueContainer || !template) return;
 
         this.issueList.forEach(issue => {
             const issueElement = this.createIssueLayout(issue, template);

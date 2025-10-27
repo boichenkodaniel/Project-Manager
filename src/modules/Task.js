@@ -6,6 +6,8 @@ class Task {
         dataByWorker: "[data-task-by-worker]",
         dataToWorker: "[data-task-to-worker]",
         dataTaskContainer: "[data-task-container]",
+        dataTaskContainerInDashboard: "[data-task-container-in-dashboard]",
+        dataTemplateInDashboard: "[data-task-template-in-dashboard]",
     };
 
     taskList = [
@@ -43,18 +45,30 @@ class Task {
 
     constructor() {
         this.render();
+        this.renderInDashboard();
     }
 
     render() {
         const taskContainer = document.querySelector(this.root.dataTaskContainer);
         const template = document.querySelector(this.root.dataTemplate);
 
-        if (!taskContainer || !template) {
-            console.error('Missing required DOM elements');
-            return;
-        }
+        // Проверяем существование элементов
+        if (!taskContainer || !template) return;
 
         this.taskList.forEach(task => {
+            const taskElement = this.createTaskLayout(task, template);
+            taskContainer.appendChild(taskElement);
+        });
+    }
+
+    renderInDashboard() {
+        const taskContainer = document.querySelector(this.root.dataTaskContainerInDashboard);
+        const template = document.querySelector(this.root.dataTemplateInDashboard);
+
+        // Проверяем существование элементов
+        if (!taskContainer || !template) return;
+
+        this.taskList.slice(-3).forEach(task => {
             const taskElement = this.createTaskLayout(task, template);
             taskContainer.appendChild(taskElement);
         });
