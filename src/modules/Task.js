@@ -8,6 +8,7 @@ class Task {
         dataTaskContainer: "[data-task-container]",
         dataTaskContainerInDashboard: "[data-task-container-in-dashboard]",
         dataTemplateInDashboard: "[data-task-template-in-dashboard]",
+        dataTotal: "[data-total-tasks]",
     };
 
     taskList = [
@@ -59,6 +60,7 @@ class Task {
             const taskElement = this.createTaskLayout(task, template);
             taskContainer.appendChild(taskElement);
         });
+
     }
 
     renderInDashboard() {
@@ -72,6 +74,10 @@ class Task {
             const taskElement = this.createTaskLayout(task, template);
             taskContainer.appendChild(taskElement);
         });
+
+        const totalElement = document.querySelector(this.root.dataTotal);
+        if (!totalElement || !totalElement.textContent) return;
+        totalElement.textContent = String(this.taskList.length);
     }
 
     createTaskLayout(task, template) {
