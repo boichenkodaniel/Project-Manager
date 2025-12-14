@@ -6,54 +6,77 @@ class User {
     dataAdminContainer: "[data-admin-container]",
     dataEmployeeContainer: "[data-employee-container]",
     dataClientContainer: "[data-client-container]",
-      dataTotal: "[data-total-users]",
+    dataTotal: "[data-total-users]",
   };
 
-  userList = [
-    {
-      name: 'Tommy Fury',
-      created: 'Created: 15 Jan 25',
-      type: 'admin'
-    },
-    {
-      name: 'Tommy Fury',
-      created: 'Created: 10 Jan 25',
-      type: 'admin'
-    },
-    {
-      name: 'Tommy Fury',
-      created: 'Created: 12 Jan 25',
-      type: 'employee'
-    },
-    {
-      name: 'Tommy Fury',
-      created: 'Created: 08 Jan 25',
-      type: 'employee'
-    },
-    {
-      name: 'Tommy Fury',
-      created: 'Created: 14 Jan 25',
-      type: 'employee'
-    },
-    {
-      name: 'Tommy Fury',
-      created: 'Created: 05 Jan 25',
-      type: 'client'
-    },
-    {
-      name: 'Tommy Fury',
-      created: 'Created: 20 Jan 25',
-      type: 'client'
-    },
-    {
-      name: 'Tommy Fury',
-      created: 'Created: 12 Jan 25',
-      type: 'employee'
-    }
-  ];
+  userList = []; // будет заполнен из API
+
   constructor() {
-    this.render();
-    this.renderInfoToDashboard();
+    this.loadAndRender();
+  }
+
+  // Основной метод: загрузка + рендер
+  async loadAndRender() {
+    try {
+      const users = await this.fetchUsers();
+      this.userList = this.mapUsersToView(users);
+      this.render();
+      this.renderInfoToDashboard();
+    } catch (error) {
+      console.error('Ошибка загрузки пользователей:', error);
+      this.showError(error.message || 'Не удалось загрузить пользователей');
+    }
+  }
+
+  // Загрузка из бэкенда
+  async fetchUsers() {
+    const response = await fetch('/api?action=user.index');
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    const result = await response.json();
+    if (!result.success) {
+      throw new Error(result.error || 'Ошибка API');
+    }
+    return result.data || [];
+  }
+
+  // Преобразование из БД → view-модель (type: admin/employee/client)
+  mapUsersToView(users) {
+    return users.map(user => {
+      let type = 'employee'; // по умолчанию
+      let role = 'employee'; // стандартное значение для формы
+
+      if (['Администратор'].includes(user.role)) {
+        type = 'admin';
+        role = 'admin';
+      } else if (['Руководитель', 'Исполнитель'].includes(user.role)) {
+        type = 'employee';
+        role = 'employee';
+      } else if (user.role === 'Клиент') {
+        type = 'client';
+        role = 'client';
+      }
+
+      let created = 'Created: —';
+      if (user.created_at) {
+        const date = new Date(user.created_at);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = date.toLocaleString('en-GB', { month: 'short' });
+        const year = String(date.getFullYear()).slice(-2);
+        created = `Created: ${day} ${month} ${year}`;
+      }
+
+      return {
+        id: user.id,
+        name: user.fullname || user.login || '—',
+        email: user.email,
+        role,  // <- стандартное значение для формы
+        created,
+        type,
+        login:user.login
+      };
+    });
   }
 
   render() {
@@ -63,18 +86,18 @@ class User {
     const template = document.querySelector(this.root.dataTemplate);
 
     if (!adminContainer || !employeeContainer || !clientContainer || !template) {
-        return;
+      console.warn('Один или несколько элементов не найдены');
+      return;
     }
 
-    // Очищаем контейнеры (на случай повторного рендера)
+    // Очищаем
     adminContainer.innerHTML = '';
     employeeContainer.innerHTML = '';
     clientContainer.innerHTML = '';
 
-    // Распределяем пользователей по контейнерам
+    // Распределяем
     this.userList.forEach(user => {
       const userElement = this.createUserLayout(user, template);
-
       switch (user.type) {
         case 'admin':
           adminContainer.appendChild(userElement);
@@ -86,43 +109,86 @@ class User {
           clientContainer.appendChild(userElement);
           break;
         default:
-          console.warn(`Unknown user type: ${user.type}`);
+          console.warn(`Неизвестный тип: ${user.type}`);
       }
     });
 
-    // Проверяем если контейнеры пустые, добавляем сообщение
     this.checkEmptyContainers(adminContainer, employeeContainer, clientContainer);
+
 
   }
 
   renderInfoToDashboard() {
-
-      const totalElement = document.querySelector(this.root.dataTotal);
-      if (!totalElement || !totalElement.textContent) return;
+    const totalElement = document.querySelector(this.root.dataTotal);
+    if (totalElement) {
       totalElement.textContent = String(this.userList.length);
+    }
   }
 
   createUserLayout(user, template) {
-    const { name, created } = user;
-    const userElement = document.importNode(template.content, true);
-    userElement.querySelector(this.root.dataName).textContent = name;
-    userElement.querySelector(this.root.dataCreated).textContent = created;
+    const { id, name, created, role, email } = user;
 
-    return userElement;
+    const fragment = document.importNode(template.content, true);
+    const li = fragment.querySelector('.user-item');
+
+    li.dataset.id = id;
+    li.dataset.type = 'user';
+
+    // Опционально сохраняем email и роль для удобства
+    li.dataset.email = email;
+    li.dataset.role = role;
+    li.dataset.login = user.login;
+    const nameEl = fragment.querySelector(this.root.dataName);
+    const createdEl = fragment.querySelector(this.root.dataCreated);
+
+    if (nameEl) nameEl.textContent = name;
+    if (createdEl) createdEl.textContent = created;
+
+    return fragment;
   }
 
-  checkEmptyContainers(adminContainer, employeeContainer, clientContainer) {
-    if (adminContainer.children.length === 0) {
-      adminContainer.innerHTML = '<li class="no-users">No admin users found</li>';
-    }
-    if (employeeContainer.children.length === 0) {
-      employeeContainer.innerHTML = '<li class="no-users">No employee users found</li>';
-    }
-    if (clientContainer.children.length === 0) {
-      clientContainer.innerHTML = '<li class="no-users">No client users found</li>';
-    }
+
+
+  checkEmptyContainers(...containers) {
+    containers.forEach(container => {
+      if (container.children.length === 0) {
+        container.innerHTML = `<li class="no-users">No ${container.dataset?.containerType || 'users'} found</li>`;
+      }
+    });
   }
 
+  // Показ ошибки в интерфейсе (опционально)
+  showError(message) {
+    const containers = [
+      document.querySelector(this.root.dataAdminContainer),
+      document.querySelector(this.root.dataEmployeeContainer),
+      document.querySelector(this.root.dataClientContainer)
+    ].filter(Boolean);
+
+    containers.forEach(container => {
+      container.innerHTML = `<li class="error-message">⚠️ ${message}</li>`;
+    });
+
+    const totalEl = document.querySelector(this.root.dataTotal);
+    if (totalEl) totalEl.textContent = '0';
+  }
 }
+
+
+document.addEventListener('click', (e) => {
+  const actionBtn = e.target.closest('[data-action]');
+  if (!actionBtn) return;
+
+  const action = actionBtn.dataset.action;
+  const userItem = actionBtn.closest('.user-item');
+  const userId = userItem.dataset.id;
+
+
+
+  if (action === 'delete') {
+    this.deleteUser(userId);
+  }
+});
+
 
 export default User;

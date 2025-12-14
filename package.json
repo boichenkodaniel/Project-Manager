@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "backend": "cd src/backend && C:/Users/danie/Downloads/php/php -S localhost:8000",
+    "dev:full": "concurrently \"npm run backend\" \"vite\""
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "vite": "^7.1.7"
   },
   "dependencies": {

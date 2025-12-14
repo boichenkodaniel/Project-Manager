@@ -96,21 +96,109 @@ function initFormTabs() {
 function initFormSubmit() {
   forms.forEach(form => {
     form.addEventListener('submit', e => {
-      e.preventDefault()
+      e.preventDefault();
 
-      const type = form.dataset.form
-      const data = Object.fromEntries(new FormData(form))
+      const data = Object.fromEntries(new FormData(form));
+      const editId = form.dataset.editId;
 
-      if (modalMode === 'create') {
-        createEntity(type, data)
+      if (editId) {
+        updateUser(editId, data);
+        delete form.dataset.editId;
       } else {
-        updateEntity(type, currentId, data)
+        createUser(data);
       }
 
-      closeModal()
-    })
-  })
+      form.reset();
+      closeModal();
+    });
+  });
 }
+function mapRoleForDB(role) {
+  switch (role) {
+    case 'admin': return 'Администратор';
+    case 'employee': return 'Исполнитель'; // или 'Руководитель' в зависимости от того, что нужно
+    case 'client': return 'Клиент';
+    default: return role; // на всякий случай
+  }
+}
+async function updateUser(id, data) {
+  try {
+
+    const body = {
+      fullname: data.userName,
+      email: data.userEmail,
+      role: mapRoleForDB(data.userRole)
+    };
+
+    const response = await fetch(`/api?action=user.update&id=${id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error || 'Ошибка обновления пользователя');
+    }
+
+    console.log('User updated:', data);
+
+    // Обновляем DOM после успешного обновления
+    updateUserInDOM(id, data);
+
+  } catch (err) {
+    console.error('Update user failed:', err);
+    alert('Не удалось обновить пользователя: ' + err.message);
+  }
+}
+
+function updateUserInDOM(id, data) {
+  const li = document.querySelector(`.user-item[data-id="${id}"]`);
+  if (!li) return;
+
+  // Обновляем dataset
+  li.dataset.role = data.userRole;
+  li.dataset.email = data.userEmail;
+
+  // Обновляем имя в DOM
+  const nameEl = li.querySelector('[data-user-name]');
+  if (nameEl) nameEl.textContent = data.userName;
+}
+
+
+
+async function deleteUser(id) {
+  if (!confirm('Вы уверены, что хотите удалить этого пользователя?')) return;
+
+  try {
+    const response = await fetch(`/api?action=user.delete&id=${id}`, {
+      method: 'POST', // или 'DELETE', если API поддерживает
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error || 'Ошибка удаления пользователя');
+    }
+
+    // Удаляем из DOM
+    removeUserFromDOM(id);
+
+    console.log('User deleted:', id);
+
+  } catch (err) {
+    console.error('Delete user failed:', err);
+    alert('Не удалось удалить пользователя: ' + err.message);
+  }
+}
+
+function removeUserFromDOM(id) {
+  const li = document.querySelector(`.user-item[data-id="${id}"]`);
+  if (li) li.remove();
+}
+
+
 function createEntity(type, data) {
   console.log('CREATE', type, data)
 }
@@ -124,9 +212,71 @@ function createTask(data) {
   console.log('Create task:', data)
 }
 
-function createUser(data) {
-  console.log('Create user:', data)
+async function createUser(data) {
+  try {
+    // Формируем тело запроса
+    const body = {
+      fullname: data.userName,
+      email: data.userEmail,
+      role: mapRoleForDB(data.userRole) // приводим к значению для базы
+    };
+
+    const response = await fetch(`/api?action=user.create`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error || 'Ошибка создания пользователя');
+    }
+
+    // result.data теперь содержит объект нового пользователя с id
+    const newUser = result.data;
+
+    console.log('User created:', newUser);
+
+    // Добавляем нового пользователя в DOM
+    addUserToDOM(newUser);
+
+    closeModal();
+
+  } catch (err) {
+    console.error('Create user failed:', err);
+    alert('Не удалось создать пользователя: ' + err.message);
+  }
 }
+
+function addUserToDOM(user) {
+  const template = document.querySelector('[data-user-template]');
+  const fragment = document.importNode(template.content, true);
+  const li = fragment.querySelector('.user-item');
+
+  li.dataset.id = user.id;                
+  li.dataset.role = user.role;            
+  li.dataset.email = user.email;
+
+  const nameEl = li.querySelector('[data-user-name]');
+  const createdEl = li.querySelector('[data-user-created]');
+
+  if (nameEl) nameEl.textContent = user.fullname;
+  if (createdEl) createdEl.textContent = 'Created: ' + new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' });
+
+  // Выбираем контейнер в зависимости от роли
+  const containerSelector = {
+    'Администратор': '[data-admin-container]',
+    'Исполнитель': '[data-employee-container]',
+    'Клиент': '[data-client-container]'
+  }[user.role] || '[data-employee-container]';
+
+  const container = document.querySelector(containerSelector);
+  if (container) container.appendChild(fragment);
+}
+
+
+
 
 function createProject(data) {
   console.log('Create project:', data)
@@ -221,16 +371,32 @@ document.addEventListener('click', e => {
     openedMenu = null
   }
 })
+
 function handleEdit(type, id) {
-  const data = getEntityData(type, id)
+  const data = getEntityData(type, id);
+  const form = document.querySelector(`.form[data-form="${type}"]`);
+
+  // Устанавливаем id редактируемого объекта
+  form.dataset.editId = id;
 
   openModal({
     type,
     mode: 'edit',
     data
-  })
+  });
 }
+
 function getEntityData(type, id) {
+  if (type === 'user') {
+    const li = document.querySelector(`.user-item[data-id="${id}"]`)
+    return {
+      id,
+      userName: li.dataset.name || li.querySelector('[data-user-name]')?.textContent,
+      userEmail: li.dataset.email,
+      userRole: li.dataset.role
+    }
+  }
+  // Для задач и проектов оставляем заглушку
   return {
     id,
     taskName: 'Fix UI',
@@ -242,11 +408,8 @@ function getEntityData(type, id) {
 }
 
 function handleDelete(type, id) {
-  const confirmed = confirm(`Delete this ${type}?`)
-  if (!confirmed) return
-
-  console.log('DELETE', type, id)
-
-  // тут потом API + удаление из DOM
+  if (type === 'user') {
+    deleteUser(id);
+  }
+  // для других сущностей потом добавим
 }
-
