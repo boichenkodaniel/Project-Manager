@@ -60,13 +60,6 @@ class User {
     const clientContainer = document.querySelector(this.root.dataClientContainer);
     const template = document.querySelector(this.root.dataTemplate);
 
-    // Проверяем существование элементов
-    if (!adminContainer || !employeeContainer || !clientContainer || !template) {
-      console.error('One or more required elements not found');
-      return;
-    }
-
-    // Очищаем контейнеры (на случай повторного рендера)
     adminContainer.innerHTML = '';
     employeeContainer.innerHTML = '';
     clientContainer.innerHTML = '';

@@ -30,7 +30,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="task.html" class="nav-link nav-link--active">
+                        <a href="tasks.html" class="nav-link">
                             <img src="src/assets/icons/tasks.svg" alt="" loading="lazy" />
                             <p>Tasks</p>
                         </a>
@@ -38,7 +38,6 @@
                 </ul>
             </nav>
 
-            <!-- Остальной сайдбар как в index.html -->
             <hr class="nav-divider" />
 
             <section class="projects-section">
@@ -79,7 +78,7 @@
             <nav class="navigation">
                 <ul class="nav-list">
                     <li class="nav-item">
-                        <a href="users.html" class="nav-link">
+                        <a href="users.html" class="nav-link nav-link--active">
                             <img src="src/assets/icons/users.svg" alt="" loading="lazy" />
                             <p>All Users</p>
                         </a>
@@ -92,7 +91,7 @@
                     </li>
                 </ul>
             </nav>
-            <button class="nav-button">
+            <button class="nav-button" data-open="user">
                 <img src="src/assets/icons/plus.svg" alt="" loading="lazy" />
             </button>
         </aside>
@@ -125,22 +124,200 @@
                 </div>
             </div>
         </main>
+        
+    </div>
+        <div class="modal hidden" id="create-modal">
+        <div class="modal__overlay" data-close-modal></div>
+
+        <div class="modal__content">
+            <header class="modal__header">
+                <h2 class="modal__title" data-modal-title>Add</h2>
+                <button class="modal__close" type="button" data-close-modal>
+                    <img class="logo" src="src/assets/icons/logo.svg" alt="" width="" height="" loading="lazy" />
+                </button>
+            </header>
+
+            <!-- Tabs -->
+            <div class="modal__tabs">
+                <button class="tab tab--active" data-tab="task">Task</button>
+                <button class="tab" data-tab="user">User</button>
+                <button class="tab" data-tab="project">Project</button>
+            </div>
+
+            <!-- Forms -->
+            <div class="modal__body">
+
+                <form class="form form--active" data-form="task" id="taskForm">
+
+                    <label for="taskName">Name</label>
+                    <input type="text" name="taskName" id="taskName" required>
+
+                    <label for="taskDescription">Description</label>
+                    <textarea name="taskDescription" id="taskDescription"></textarea>
+
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="taskBy">Assigned by</label>
+                            <select name="taskBy" id="taskBy">
+                                    <option value=""> Select user </option>
+                                    <option value="1">John Smith</option>
+                                    <option value="2">Anna Brown</option>
+                                    <option value="3">Mike Johnson</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="taskTo">Assigned to</label>
+                            <select name="taskTo" id="taskTo">
+                                    <option value="">— Select user —</option>
+                                    <option value="1">John Smith</option>
+                                    <option value="2">Anna Brown</option>
+                                    <option value="3">Mike Johnson</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="taskStartDate">Start Date</label>
+                            <input type="date" name="taskStartDate" id="taskStartDate">
+                        </div>
+
+                        <div class="form-field">
+                            <label for="taskEndDate">End Date</label>
+                            <input type="date" name="taskEndDate" id="taskEndDate">
+                        </div>
+                    </div>
+
+
+                    <div class="status-picker">
+                        <label class="status-option">
+                            <input type="radio" name="taskStatus" value="pending" checked>
+                            <span>
+                                <img src="./src/assets/icons/pending.svg" alt="" loading="lazy">
+                                Pending
+                            </span>
+                        </label>
+
+                        <label class="status-option">
+                            <input type="radio" name="taskStatus" value="in-process">
+                            <span>
+                                <img src="./src/assets/icons/in-progress.svg" alt="" loading="lazy">
+                                In Process
+                            </span>
+                        </label>
+
+                        <label class="status-option">
+                            <input type="radio" name="taskStatus" value="completed">
+                            <span>
+                                <img src="./src/assets/icons/complete.svg" alt="" height="" loading="lazy">
+                                Completed
+                            </span>
+                        </label>
+                    </div>
+                    <hr class="formLine">
+                    <button class="formButton" type="submit">Create Task</button>
+                </form>
+
+
+                <!-- USER -->
+                <form class="form" data-form="user" id="userForm">
+
+                    <label for="userName">User name</label>
+                    <input type="text" name="userName" id="userName" required>
+
+                    <label for="userEmail">Email</label>
+                    <input type="email" name="userEmail" id="userEmail" required>
+
+                    <div class="role-picker">
+                        <label class="role-option">
+                            <input type="radio" name="userRole" value="employee" checked>
+                            <span>
+                                <img src="./src/assets/icons/employee.svg" alt="" loading="lazy">
+                                Employee
+                            </span>
+                        </label>
+
+                        <label class="role-option">
+                            <input type="radio" name="userRole" value="client">
+                            <span>
+                                <img src="./src/assets/icons/client.svg" alt="" loading="lazy">
+                                Client
+                            </span>
+                        </label>
+
+                        <label class="role-option">
+                            <input type="radio" name="userRole" value="admin">
+                            <span>
+                                <img src="./src/assets/icons/admin.svg" alt="" loading="lazy">
+                                Admin
+                            </span>
+                        </label>
+                    </div>
+                    <hr class="formLine">
+                    <button class="formButton" type="submit">Create User</button>
+                </form>
+
+
+                <!-- PROJECT -->
+                <form class="form" data-form="project" id="projectForm">
+
+                    <label for="projectName">Project name</label>
+                    <input type="text" name="projectName" id="projectName" required>
+
+                    <label for="projectDescription">Description</label>
+                    <textarea name="projectDescription" id="projectDescription"></textarea>
+
+                    <label for="projectClient">Client</label>
+                    <select name="projectClient" id="projectClient">
+                            <option value="">— Select user —</option>
+    <option value="1">John Smith</option>
+    <option value="2">Anna Brown</option>
+    <option value="3">Mike Johnson</option>
+                    </select>
+
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="projectStartDate">Start date</label>
+                            <input type="date" name="projectStartDate" id="projectStartDate">
+                        </div>
+
+                        <div class="form-field">
+                            <label for="projectEndDate">End date</label>
+                            <input type="date" name="projectEndDate" id="projectEndDate">
+                        </div>
+                    </div>
+                    <hr class="formLine">
+                    <button class="formButton" type="submit">Create Project</button>
+                </form>
+
+
+            </div>
+        </div>
     </div>
 </body>
 
 <template data-user-template>
-    <li class="user-item">
+    <li class="user-item" data-id="5" data-type="user">
         <div class="user-item-inner">
             <div class="user-profile">
                 <div class="user-profile__img-box">
                     <img src="src/assets/icons/profile.svg" alt="Profile photo" class="user-profile__img">
                 </div>
                 <div class="user-profile__info">
-                    <h2 class="user-profile__name" data-user-name >Tommy Fury</h2>
+                    <h2 class="user-profile__name" data-user-name>Tommy Fury</h2>
                     <p class="user-profile__created" data-user-created>Created: 12 Jan 25</p>
                 </div>
-                <div class="action-menu">
-                    <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
+                <div class="action-menu" data-actions>
+                    <button class="action-menu__trigger" type="button">
+                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height=""
+                         loading="lazy" />
+                    </button>
+
+                    <div class="action-menu__dropdown hidden">
+                        <button type="button" data-action="edit">Edit</button>
+                        <button type="button" data-action="delete">Delete</button>
+                    </div>
                 </div>
             </div>
         </div>

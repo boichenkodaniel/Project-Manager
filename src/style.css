@@ -123,10 +123,19 @@ body{
   background: #191E24;
 }
 .nav-button{
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-top: auto;
   height: 85px;
   border-radius: 10px;
   background-color: #15191E;
+}
+.nav-button__text{
+  font-size: 20px;
+  color: white;
+  font-weight: 500;
+  margin-right: 15px;
 }
 .main {
   padding-inline: 50px;
@@ -167,7 +176,6 @@ body{
 
 .main__content hr {
   width: 100%;
-  color: #15191e;
 }
 
 .main__content--inner {
@@ -290,7 +298,10 @@ body{
 .activity-item__to-worker {
   font-size: 10px;
 }
-.action-menu {
+.action-menu__trigger {
+  background-color: transparent;
+  width: 25px;
+  height: 35px;
 }
 .main__issues {
   display: flex;
@@ -298,6 +309,39 @@ body{
   align-items: center;
   flex-direction: column;
 }
+.action-menu {
+    position: relative;
+
+}
+
+.action-menu__dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: #15191e;
+    color: #FFF;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    min-width: 120px;
+    box-shadow: 0 10px 25px rgba(0,0,0,.1);
+    z-index: 20;
+}
+
+.action-menu__dropdown button {
+      color: #FFF;
+    width: 100%;
+    padding: 10px 12px;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.action-menu__dropdown button:hover {
+    background: #1D232A;
+}
+
 .main__issues-header {
 }
 .issues-list {
@@ -515,3 +559,148 @@ body{
 .action-menu {
   margin-left: auto;
 }
+
+.hidden {
+    display: none;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    
+}
+
+.modal__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+}
+
+.modal__content {
+    width: 700px;
+    position: relative;
+    background: #252c35;
+    color: #FFF;
+    margin: 5% auto;
+    padding: 50px;
+    border-radius: 12px;
+}
+.modal__header{
+  display: flex;
+  justify-content: space-between;
+  align-content: center;
+  margin-bottom: 10px;
+}
+.modal__title{
+  font-size: 24px;
+  align-items: center;
+  line-height: 2;
+}
+.modal__close{
+  background-color:transparent
+}
+.modal__tabs{
+  display: flex;
+  background-color: #1D232A;
+  padding: 5px 5px;
+  border-radius: 10px;
+
+}
+.tab {
+  width: 33.33%;
+  background-color: transparent;
+  color: #FFF;
+  border-radius: 10px;
+  height: 50px;
+}
+
+.tab--active {
+  background-color: #191E24;
+
+}
+
+.form {
+    display: none;
+
+}
+label{
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+.formButton{
+  margin-top: 20px;
+  background-color: #191E24;
+  color:#FFF;
+  height: 60px;
+  border-radius: 10px;
+  transition: all 0.5s;
+}
+.formButton:hover{
+  background-color: #101418;
+
+}
+.formLine{
+  margin-top: 30px;
+  border:1px #1D232A solid;
+}
+
+input, textarea, select{
+    color: #FFF;
+  background-color: #191E24;
+  height: 50px;
+  outline: none;
+  border: 1px solid #3a434e;
+  border-radius: 6px;
+  padding: 5px;
+}
+.form-row{
+  display: flex;
+  justify-content: space-between;
+}
+.form-field{
+  display: flex;
+  flex-direction: column;
+  width: 49%;
+}
+.form--active {
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+
+}
+
+.status-picker, .role-picker {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+.status-option, .role-option {
+width: 33%;
+
+}
+.status-option input, .role-option input {
+    display: none;
+}
+
+.status-option span ,.role-option span{
+    height: 100px;
+    width: 100%;
+    display: flex;
+    row-gap: 8px;
+    background-color: #191E24;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 3px solid #3a434e;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.5s;
+}
+
+.status-option input:checked + span, .role-option input:checked + span{
+  border: 3px solid #8d9fb4;
+}
+
