@@ -5,7 +5,8 @@ class User {
     dataCreated: "[data-user-created]",
     dataAdminContainer: "[data-admin-container]",
     dataEmployeeContainer: "[data-employee-container]",
-    dataClientContainer: "[data-client-container]"
+    dataClientContainer: "[data-client-container]",
+      dataTotal: "[data-total-users]",
   };
 
   userList = [
@@ -52,6 +53,7 @@ class User {
   ];
   constructor() {
     this.render();
+    this.renderInfoToDashboard();
   }
 
   render() {
@@ -60,6 +62,11 @@ class User {
     const clientContainer = document.querySelector(this.root.dataClientContainer);
     const template = document.querySelector(this.root.dataTemplate);
 
+    if (!adminContainer || !employeeContainer || !clientContainer || !template) {
+        return;
+    }
+
+    // Очищаем контейнеры (на случай повторного рендера)
     adminContainer.innerHTML = '';
     employeeContainer.innerHTML = '';
     clientContainer.innerHTML = '';
@@ -85,6 +92,14 @@ class User {
 
     // Проверяем если контейнеры пустые, добавляем сообщение
     this.checkEmptyContainers(adminContainer, employeeContainer, clientContainer);
+
+  }
+
+  renderInfoToDashboard() {
+
+      const totalElement = document.querySelector(this.root.dataTotal);
+      if (!totalElement || !totalElement.textContent) return;
+      totalElement.textContent = String(this.userList.length);
   }
 
   createUserLayout(user, template) {

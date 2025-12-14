@@ -9,6 +9,7 @@ class Project {
         dataCountTask: "[data-project-count-task]",
         dataAssigned: "[data-project-assigned]",
         dataProjectContainer: "[data-project-container]",
+        dataTotal: "[data-total-projects]",
     };
 
     projectList = [
@@ -40,6 +41,7 @@ class Project {
 
     constructor() {
         this.render();
+        this.renderInfoToDashboard()
     }
 
     render() {
@@ -52,6 +54,13 @@ class Project {
             const projectElement = this.createProjectLayout(project, template);
             projectContainer.appendChild(projectElement);
         });
+
+    }
+
+    renderInfoToDashboard() {
+        const totalElement = document.querySelector(this.root.dataTotal);
+        if (!totalElement || !totalElement.textContent) return;
+        totalElement.textContent = String(this.projectList.length);
     }
 
     createProjectLayout(project, template) {
