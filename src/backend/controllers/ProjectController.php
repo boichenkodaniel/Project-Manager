@@ -18,7 +18,7 @@ class ProjectController {
     // GET ?action=projects.index
     public function index() {
         try {
-            $projects = $this->model->getAllProjects();
+            $projects = $this->model->getAllProjects(false); // без менеджера
             $this->json(['success' => true, 'data' => $projects]);
         } catch (Exception $e) {
             $this->json(['success' => false, 'error' => 'Ошибка получения проектов: ' . $e->getMessage()], 500);
@@ -50,24 +50,24 @@ class ProjectController {
             $this->json(['success' => false, 'error' => 'Тело запроса должно быть в формате JSON'], 400);
         }
 
-        $required = ['Title', 'Status', 'ManagerID'];
+        $required = ['title', 'status', 'clientid'];
         foreach ($required as $field) {
-            if (!isset($input[$field]) || ($field !== 'DetailedDescription' && trim($input[$field]) === '')) {
+            if (!isset($input[$field]) || trim($input[$field]) === '') {
                 $this->json(['success' => false, 'error' => "Поле '$field' обязательно"], 400);
             }
         }
 
         try {
             $id = $this->model->createProject(
-                $input['Title'],
-                $input['DetailedDescription'] ?? null,
-                $input['StartDate'] ?? null,
-                $input['PlannedEndDate'] ?? null,
-                $input['ActualEndDate'] ?? null,
-                $input['Status'],
-                $input['ManagerID']
+                $input['title'],
+                $input['detaileddescription'] ?? null,
+                $input['startdate'] ?? null,
+                $input['plannedenddate'] ?? null,
+                $input['status'],
+                $input['clientid']
             );
-            $this->json(['success' => true, 'message' => 'Проект создан', 'id' => $id], 201);
+            $project = $this->model->getProjectById($id);
+            $this->json(['success' => true, 'message' => 'Проект создан', 'data' => $project], 201);
         } catch (InvalidArgumentException $e) {
             $this->json(['success' => false, 'error' => $e->getMessage()], 400);
         } catch (Exception $e) {
@@ -89,19 +89,19 @@ class ProjectController {
         try {
             $updated = $this->model->updateProject(
                 $id,
-                $input['Title'] ?? null,
-                $input['DetailedDescription'] ?? null,
-                $input['StartDate'] ?? null,
-                $input['PlannedEndDate'] ?? null,
-                $input['ActualEndDate'] ?? null,
-                $input['Status'] ?? null,
-                $input['ManagerID'] ?? null
+                $input['title'] ?? null,
+                $input['detaileddescription'] ?? null,
+                $input['startdate'] ?? null,
+                $input['plannedenddate'] ?? null,
+                $input['status'] ?? null,
+                $input['clientid'] ?? null
             );
 
             if ($updated) {
-                $this->json(['success' => true, 'message' => 'Проект обновлён']);
+                $project = $this->model->getProjectById($id);
+                $this->json(['success' => true, 'message' => 'Проект обновлён', 'data' => $project]);
             } else {
-                $this->json(['success' => false, 'error' => 'Проект не найден или изменения не внесены'], 400);
+                $this->json(['success' => false, 'error' => 'Проект не найден или изменений нет'], 400);
             }
         } catch (InvalidArgumentException $e) {
             $this->json(['success' => false, 'error' => $e->getMessage()], 400);

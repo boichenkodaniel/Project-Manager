@@ -56,23 +56,12 @@ class UserModel {
 
     // Удалить пользователя
     public function deleteUser($id) {
-    // 1. Удаляем отчёты (если ON DELETE CASCADE — не нужно, но для надёжности)
-    $this->pdo->prepare('DELETE FROM "report" WHERE "userid" = :id')->execute(['id' => $id]);
 
     // 2. Удаляем задачи, где пользователь исполнитель
-    $this->pdo->prepare('DELETE FROM "task" WHERE "executorid" = :id')->execute(['id' => $id]);
+    $this->pdo->prepare('DELETE FROM "task" WHERE "taskto" = :id')->execute(['id' => $id]);
 
     // 3. Удаляем проекты, где пользователь менеджер
-    $this->pdo->prepare('DELETE FROM "project" WHERE "managerid" = :id')->execute(['id' => $id]);
-
-    // 4. Удаляем назначения ресурсов (TaskResource)
-    $this->pdo->prepare('DELETE FROM "taskresource" WHERE "resourceid" IN (
-        SELECT "id" FROM "resource" WHERE "id" IN (
-            SELECT "resourceid" FROM "taskresource" WHERE "taskid" IN (
-                SELECT "id" FROM "task" WHERE "executorid" = :id
-            )
-        )
-    )')->execute(['id' => $id]);
+    $this->pdo->prepare('DELETE FROM "project" WHERE "clientid" = :id')->execute(['id' => $id]);
 
     // 5. И наконец — удаляем пользователя
     $stmt = $this->pdo->prepare('DELETE FROM "User" WHERE "id" = :id');

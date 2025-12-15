@@ -18,9 +18,13 @@ class TaskController {
     public function index() {
         try {
             $tasks = $this->model->getAllTasks();
+            foreach ($tasks as &$task) {
+                $task['TaskByID'] = $task['TaskBy'];
+                $task['TaskToID'] = $task['TaskTo'];
+}
             $this->json(['success' => true, 'data' => $tasks]);
         } catch (Exception $e) {
-            $this->json(['success' => false, 'error' => 'Ошибка получения задач: ' . $e->getMessage()], 500);
+            $this->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
 
@@ -28,28 +32,20 @@ class TaskController {
         if (!$id || !is_numeric($id)) {
             $this->json(['success' => false, 'error' => 'Некорректный ID задачи'], 400);
         }
-
-        try {
-            $task = $this->model->getTaskById($id);
-            if ($task) {
-                $this->json(['success' => true, 'data' => $task]);
-            } else {
-                $this->json(['success' => false, 'error' => 'Задача не найдена'], 404);
-            }
-        } catch (Exception $e) {
-            $this->json(['success' => false, 'error' => $e->getMessage()], 500);
+        $task = $this->model->getTaskById($id);
+        if ($task) {
+            $this->json(['success' => true, 'data' => $task]);
+        } else {
+            $this->json(['success' => false, 'error' => 'Задача не найдена'], 404);
         }
     }
 
     public function create() {
         $input = json_decode(file_get_contents('php://input'), true);
-        if (!$input) {
-            $this->json(['success' => false, 'error' => 'Тело запроса должно быть в формате JSON'], 400);
-        }
+        if (!$input) $this->json(['success' => false, 'error' => 'Тело запроса должно быть JSON'], 400);
 
-        $required = ['Title', 'ProjectID'];
-        foreach ($required as $field) {
-            if (!isset($input[$field]) || trim((string)$input[$field]) === '') {
+        foreach (['Title', 'ProjectID', 'TaskBy'] as $field) {
+            if (empty($input[$field])) {
                 $this->json(['success' => false, 'error' => "Поле '$field' обязательно"], 400);
             }
         }
@@ -60,100 +56,60 @@ class TaskController {
                 $input['Description'] ?? null,
                 $input['ProjectID'],
                 $input['ExecutorID'] ?? null,
-                $input['PlannedStartDate'] ?? null,
-                $input['PlannedEndDate'] ?? null,
-                $input['ActualStartDate'] ?? null,
-                $input['ActualEndDate'] ?? null,
-                $input['Priority'] ?? null,
-                $input['Status'] ?? null
+                $input['TaskBy'],
+                $input['StartDate'] ?? null,
+                $input['EndDate'] ?? null,
+                $input['Status'] ?? 'К выполнению'
             );
-            $this->json(['success' => true, 'message' => 'Задача создана', 'id' => $id], 201);
+            $this->json(['success' => true, 'data' => ['id' => $id] + $input], 201);
         } catch (InvalidArgumentException $e) {
             $this->json(['success' => false, 'error' => $e->getMessage()], 400);
         } catch (Exception $e) {
-            $this->json(['success' => false, 'error' => 'Ошибка создания задачи: ' . $e->getMessage()], 500);
+            $this->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
 
     public function update($id) {
-        if (!$id || !is_numeric($id)) {
-            $this->json(['success' => false, 'error' => 'Некорректный ID задачи'], 400);
-        }
+        if (!$id || !is_numeric($id)) $this->json(['success' => false, 'error' => 'Некорректный ID задачи'], 400);
 
         $input = json_decode(file_get_contents('php://input'), true);
-        if (!$input) {
-            $this->json(['success' => false, 'error' => 'Тело запроса должно быть в формате JSON'], 400);
-        }
+        if (!$input) $this->json(['success' => false, 'error' => 'Тело запроса должно быть JSON'], 400);
 
         try {
-            $updated = $this->model->updateTask(
-                $id,
-                $input['Title'] ?? null,
-                $input['Description'] ?? null,
-                $input['ProjectID'] ?? null,
-                isset($input['ExecutorID']) ? $input['ExecutorID'] : null,
-                $input['PlannedStartDate'] ?? null,
-                $input['PlannedEndDate'] ?? null,
-                $input['ActualStartDate'] ?? null,
-                $input['ActualEndDate'] ?? null,
-                $input['Priority'] ?? null,
-                $input['Status'] ?? null
-            );
-
+            $updated = $this->model->updateTask($id, $input);
             if ($updated) {
                 $this->json(['success' => true, 'message' => 'Задача обновлена']);
             } else {
-                $this->json(['success' => false, 'error' => 'Задача не найдена или изменения не внесены'], 400);
+                $this->json(['success' => false, 'error' => 'Задача не найдена или изменения не внесены'], 404);
             }
         } catch (InvalidArgumentException $e) {
             $this->json(['success' => false, 'error' => $e->getMessage()], 400);
         } catch (Exception $e) {
-            $this->json(['success' => false, 'error' => 'Ошибка обновления: ' . $e->getMessage()], 500);
+            $this->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
 
     public function delete($id) {
-        if (!$id || !is_numeric($id)) {
-            $this->json(['success' => false, 'error' => 'Некорректный ID задачи'], 400);
-        }
+        if (!$id || !is_numeric($id)) $this->json(['success' => false, 'error' => 'Некорректный ID задачи'], 400);
 
         try {
             $deleted = $this->model->deleteTask($id);
-            if ($deleted) {
-                $this->json(['success' => true, 'message' => 'Задача удалена']);
-            } else {
-                $this->json(['success' => false, 'error' => 'Задача не найдена'], 404);
-            }
+            if ($deleted) $this->json(['success' => true, 'message' => 'Задача удалена']);
+            else $this->json(['success' => false, 'error' => 'Задача не найдена'], 404);
         } catch (Exception $e) {
-            $this->json(['success' => false, 'error' => 'Ошибка удаления: ' . $e->getMessage()], 500);
+            $this->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
 
-    // ✅ Дополнительно: задачи по проекту
     public function byProject($projectID) {
-        if (!$projectID || !is_numeric($projectID)) {
-            $this->json(['success' => false, 'error' => 'Некорректный ID проекта'], 400);
-        }
-
-        try {
-            $tasks = $this->model->getTasksByProject($projectID);
-            $this->json(['success' => true, 'data' => $tasks]);
-        } catch (Exception $e) {
-            $this->json(['success' => false, 'error' => $e->getMessage()], 500);
-        }
+        if (!$projectID || !is_numeric($projectID)) $this->json(['success' => false, 'error' => 'Некорректный ID проекта'], 400);
+        $tasks = $this->model->getTasksByProject($projectID);
+        $this->json(['success' => true, 'data' => $tasks]);
     }
 
-    // ✅ Дополнительно: задачи по исполнителю
     public function byExecutor($executorID) {
-        if ($executorID === null || $executorID === '') {
-            $this->json(['success' => false, 'error' => 'ID исполнителя обязателен'], 400);
-        }
-
-        try {
-            $tasks = $this->model->getTasksByExecutor($executorID);
-            $this->json(['success' => true, 'data' => $tasks]);
-        } catch (Exception $e) {
-            $this->json(['success' => false, 'error' => $e->getMessage()], 500);
-        }
+        if ($executorID === null || $executorID === '') $this->json(['success' => false, 'error' => 'ID исполнителя обязателен'], 400);
+        $tasks = $this->model->getTasksByExecutor($executorID);
+        $this->json(['success' => true, 'data' => $tasks]);
     }
 }

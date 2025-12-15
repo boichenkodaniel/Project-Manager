@@ -178,7 +178,7 @@ class User {
 document.addEventListener('click', (e) => {
   const actionBtn = e.target.closest('[data-action]');
   if (!actionBtn) return;
-
+  console.log()
   const action = actionBtn.dataset.action;
   const userItem = actionBtn.closest('.user-item');
   const userId = userItem.dataset.id;

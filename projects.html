@@ -1,109 +1,111 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tasks - Project Manager</title>
     <script type="module" src="/src/main.js"></script>
 </head>
+
 <body>
-<div class="wrapper">
-    <aside class="aside">
-        <div class="profile">
-            <div class="profile__img-box">
-                <img src="src/assets/icons/profile.svg" alt="Profile photo" class="profile__img">
+    <div class="wrapper">
+        <aside class="aside">
+            <div class="profile">
+                <div class="profile__img-box">
+                    <img src="src/assets/icons/profile.svg" alt="Profile photo" class="profile__img">
+                </div>
+                <div class="profile__info">
+                    <h2 class="profile__name">Bhargav Joshi & Team</h2>
+                    <p class="profile__email">bhargavjoshi1237@gmail.com</p>
+                </div>
             </div>
-            <div class="profile__info">
-                <h2 class="profile__name">Bhargav Joshi & Team</h2>
-                <p class="profile__email">bhargavjoshi1237@gmail.com</p>
-            </div>
-        </div>
-        <nav class="navigation">
-            <ul class="nav-list">
-                <li class="nav-item">
-                    <a href="index.html" class="nav-link">
-                        <img src="src/assets/icons/dashboard.svg" alt="" loading="lazy"/>
-                        <p>Dashboard</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="tasks.html" class="nav-link">
-                        <img src="src/assets/icons/tasks.svg" alt="" loading="lazy"/>
-                        <p>Tasks</p>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-
-        <!-- Остальной сайдбар как в index.html -->
-        <hr class="nav-divider"/>
-
-        <section class="projects-section">
             <nav class="navigation">
                 <ul class="nav-list">
                     <li class="nav-item">
-                        <a href="projects.html" class="nav-link nav-link--active">
-                            <img src="src/assets/icons/all-projects.svg" alt="" loading="lazy" />
-                            <p>All Projects</p>
+                        <a href="index.html" class="nav-link">
+                            <img src="src/assets/icons/dashboard.svg" alt="" loading="lazy" />
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="tasks.html" class="nav-link">
+                            <img src="src/assets/icons/tasks.svg" alt="" loading="lazy" />
+                            <p>Tasks</p>
                         </a>
                     </li>
                 </ul>
             </nav>
-            <ul class="projects-sub-list">
-                <li class="projects-sub-item">
-                    <a href="#project-1" class="project-link">
-                        <p class="project__name">Project 1</p>
-                        <p class="project__counter">45</p>
-                    </a>
-                </li>
-                <li class="projects-sub-item">
-                    <a href="#project-2" class="project-link">
-                        <p class="project__name">Project 2</p>
-                        <p class="project__counter">145</p>
-                    </a>
-                </li>
-                <li class="projects-sub-item">
-                    <a href="#project-3" class="project-link">
-                        <p class="project__name">Project 3</p>
-                        <p class="project__counter">12</p>
-                    </a>
-                </li>
-            </ul>
-        </section>
 
-        <hr class="nav-divider"/>
+            <!-- Остальной сайдбар как в index.html -->
+            <hr class="nav-divider" />
 
-        <nav class="navigation">
-            <ul class="nav-list">
-                <li class="nav-item">
-                    <a href="users.html" class="nav-link">
-                        <img src="src/assets/icons/users.svg" alt="" loading="lazy"/>
-                        <p>All Users</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="issues.html" class="nav-link">
-                        <img src="src/assets/icons/issues.svg" alt="" loading="lazy"/>
-                        <p>Issues</p>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-        <button class="nav-button" data-open="project">
-            <img src="src/assets/icons/plus.svg" alt="" loading="lazy"/>
-        </button>
-    </aside>
-    <main class="main">
-        <header class="main__header">
-            <h1>Projects</h1>
-            <img class="logo" src="src/assets/icons/logo.svg" alt="" loading="lazy" />
-        </header>
-        <hr />
-        <div class="project__content" data-project-container>
-        </div>
-    </main>
+            <section class="projects-section">
+                <nav class="navigation">
+                    <ul class="nav-list">
+                        <li class="nav-item">
+                            <a href="projects.html" class="nav-link nav-link--active">
+                                <img src="src/assets/icons/all-projects.svg" alt="" loading="lazy" />
+                                <p>All Projects</p>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <ul class="projects-sub-list">
+                    <li class="projects-sub-item">
+                        <a href="#project-1" class="project-link">
+                            <p class="project__name">Project 1</p>
+                            <p class="project__counter">45</p>
+                        </a>
+                    </li>
+                    <li class="projects-sub-item">
+                        <a href="#project-2" class="project-link">
+                            <p class="project__name">Project 2</p>
+                            <p class="project__counter">145</p>
+                        </a>
+                    </li>
+                    <li class="projects-sub-item">
+                        <a href="#project-3" class="project-link">
+                            <p class="project__name">Project 3</p>
+                            <p class="project__counter">12</p>
+                        </a>
+                    </li>
+                </ul>
+            </section>
 
-</div>
+            <hr class="nav-divider" />
+
+            <nav class="navigation">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="users.html" class="nav-link">
+                            <img src="src/assets/icons/users.svg" alt="" loading="lazy" />
+                            <p>All Users</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="issues.html" class="nav-link">
+                            <img src="src/assets/icons/issues.svg" alt="" loading="lazy" />
+                            <p>Issues</p>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <button class="nav-button" data-open="project">
+                <img src="src/assets/icons/plus.svg" alt="" loading="lazy" />
+            </button>
+        </aside>
+        <main class="main">
+            <header class="main__header">
+                <h1>Projects</h1>
+                <img class="logo" src="src/assets/icons/logo.svg" alt="" loading="lazy" />
+            </header>
+            <hr />
+            <div class="project__content" data-project-container>
+            </div>
+        </main>
+
+    </div>
     <div class="modal hidden" id="create-modal">
         <div class="modal__overlay" data-close-modal></div>
 
@@ -137,20 +139,20 @@
                         <div class="form-field">
                             <label for="taskBy">Assigned by</label>
                             <select name="taskBy" id="taskBy">
-                                    <option value=""> Select user </option>
-                                    <option value="1">John Smith</option>
-                                    <option value="2">Anna Brown</option>
-                                    <option value="3">Mike Johnson</option>
+                                <option value=""> Select user </option>
+                                <option value="1">John Smith</option>
+                                <option value="2">Anna Brown</option>
+                                <option value="3">Mike Johnson</option>
                             </select>
                         </div>
 
                         <div class="form-field">
                             <label for="taskTo">Assigned to</label>
                             <select name="taskTo" id="taskTo">
-                                    <option value="">— Select user —</option>
-                                    <option value="1">John Smith</option>
-                                    <option value="2">Anna Brown</option>
-                                    <option value="3">Mike Johnson</option>
+                                <option value="">— Select user —</option>
+                                <option value="1">John Smith</option>
+                                <option value="2">Anna Brown</option>
+                                <option value="3">Mike Johnson</option>
                             </select>
                         </div>
                     </div>
@@ -248,10 +250,7 @@
 
                     <label for="projectClient">Client</label>
                     <select name="projectClient" id="projectClient">
-                            <option value="">— Select user —</option>
-    <option value="1">John Smith</option>
-    <option value="2">Anna Brown</option>
-    <option value="3">Mike Johnson</option>
+
                     </select>
 
                     <div class="form-row">
@@ -273,14 +272,13 @@
             </div>
         </div>
     </div>
-<template data-project-template>
-    <div class="project__item" data-id="5" data-type="project">
-    <div class="project__header">
-        <h3 class="project__title" data-project-name>React JS 01</h3>
-        <div class="action-menu" data-actions>
+    <template data-project-template>
+        <div class="project__item" data-id="5" data-type="project">
+            <div class="project__header">
+                <h3 class="project__title" data-project-name>React JS 01</h3>
+                <div class="action-menu" data-actions>
                     <button class="action-menu__trigger" type="button">
-                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height=""
-                         loading="lazy" />
+                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
                     </button>
 
                     <div class="action-menu__dropdown hidden">
@@ -288,31 +286,33 @@
                         <button type="button" data-action="delete">Delete</button>
                     </div>
                 </div>
-    </div>
-    <p class="project__description" data-project-description>Project Regarding creating a dash in react js using Next Js as backend and APIs.</p>
-    <div class="project__actions">
-        <div class="project__actions-item">
-            <img src="src/assets/icons/inactive.svg" alt="" width="" height=""
-                 loading="lazy" data-project-active-icon/>
-            <p class="project__actions-name" data-project-active>Inactive</p>
+            </div>
+            <p class="project__description" data-project-description>Project Regarding creating a dash in react js using
+                Next Js as backend and APIs.</p>
+            <div data-project-client style="display:none;"></div>
+            <div data-project-status style="display:none;"></div>
+
+            <div class="project__actions">
+                <div class="project__actions-item">
+                    <img src="src/assets/icons/inactive.svg" alt="" width="" height="" loading="lazy"
+                        data-project-active-icon />
+                    <p class="project__actions-name" data-project-active>Inactive</p>
+                </div>
+                <div class="project__actions-item">
+                    <img src="src/assets/icons/count-task.svg" alt="" width="" height="" loading="lazy" />
+                    <p class="project__actions-name" data-project-count-task>12 Tasks</p>
+                </div>
+                <div class="project__actions-item">
+                    <img src="src/assets/icons/date.svg" alt="" width="" height="" loading="lazy" />
+                    <p class="project__actions-name" data-project-date>1 Jun 25</p>
+                </div>
+                <div class="project__actions-item">
+                    <img src="src/assets/icons/assigned-count.svg" alt="" width="" height="" loading="lazy" />
+                    <p class="project__actions-name" data-project-assigned>6 Assigned</p>
+                </div>
+            </div>
         </div>
-        <div class="project__actions-item">
-            <img src="src/assets/icons/count-task.svg" alt="" width="" height=""
-                 loading="lazy" />
-            <p class="project__actions-name" data-project-count-task>12 Tasks</p>
-        </div>
-        <div class="project__actions-item">
-            <img src="src/assets/icons/date.svg" alt="" width="" height=""
-                 loading="lazy" />
-            <p class="project__actions-name" data-project-date>1 Jun 25</p>
-        </div>
-        <div class="project__actions-item">
-            <img src="src/assets/icons/assigned-count.svg" alt="" width="" height=""
-                 loading="lazy" />
-            <p class="project__actions-name" data-project-assigned>6 Assigned</p>
-        </div>
-    </div>
-</div>
-</template>
+    </template>
 </body>
+
 </html>

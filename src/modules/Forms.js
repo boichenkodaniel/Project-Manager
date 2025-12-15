@@ -5,6 +5,8 @@ const modalTitle = document.querySelector('[data-modal-title]')
 let modalMode = 'create' // 'create' | 'edit'
 let currentEntity = null
 let currentId = null
+let users = [];
+let projects = [];
 const TITLES = {
   task: 'Add Task',
   user: 'Add User',
@@ -22,7 +24,7 @@ function switchTab(type) {
   modalTitle.textContent = TITLES[type]
 }
 
-function openModal({ type, mode = 'create', data = null }) {
+async function openModal({ type, mode = 'create', data = null }) {
   modalMode = mode
   currentEntity = type
   currentId = data?.id ?? null
@@ -34,11 +36,33 @@ function openModal({ type, mode = 'create', data = null }) {
   updateSubmitButton(type, mode)
 
   if (mode === 'edit' && data) {
-    fillForm(type, data)
+    await loadUsersAndProjects();
+    await fillForm(type, data);
   } else {
-    clearForm(type)
+    clearForm(type);
+    if (type === 'task') {
+      await loadUsersAndProjects();
+      const form = document.querySelector(`.form[data-form="task"]`);
+      populateSelect(form.querySelector('[name="taskProject"]'), projects, 'id', 'title');
+      populateSelect(form.querySelector('[name="taskBy"]'), users, 'id', 'fullname');
+      populateSelect(form.querySelector('[name="taskTo"]'), users, 'id', 'fullname');
+    }
+    if (type === 'project') {
+      await loadUsersAndProjects();
+
+      const form = document.querySelector('.form[data-form="project"]');
+
+      populateSelect(
+        form.querySelector('[name="projectClient"]'),
+        users,
+        'id',
+        'fullname'
+      );
+    }
+
   }
 }
+
 
 function updateModalTitle(type, mode) {
   const titles = {
@@ -62,22 +86,80 @@ function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
-function fillForm(type, data) {
-  const form = document.querySelector(`.form[data-form="${type}"]`)
+async function fillForm(type, data) {
+  console.log(users);
+
+  const form = document.querySelector(`.form[data-form="${type}"]`);
+  if (!form || !data) return;
+
+  if (type === 'task') {
+
+
+    // 2. Наполняем select и сразу выставляем выбранное значение
+    populateSelect(form.querySelector('[name="taskProject"]'), projects, 'id', 'title', data.taskProject);
+    populateSelect(form.querySelector('[name="taskBy"]'), users, 'id', 'fullname', data.taskBy);
+    populateSelect(form.querySelector('[name="taskTo"]'), users, 'id', 'fullname', data.taskTo);
+  }
+  if (type === 'project') {
+    populateSelect(
+      form.querySelector('[name="projectClient"]'),
+      users,
+      'id',
+      'fullname',
+      data.projectClient
+    );
+  }
+
+  // 3. Заполняем остальные поля (текст, даты, радио), кроме select
   Object.entries(data).forEach(([key, value]) => {
-    const field = form.querySelector(`[name="${key}"]`)
-    if (!field) return
+    const field = form.querySelector(`[name="${key}"]`);
+    if (!field || field.tagName === 'SELECT') return; // Пропускаем select
 
     if (field.type === 'radio') {
-      form.querySelector(`[name="${key}"][value="${value}"]`).checked = true
+      const radio = form.querySelector(`[name="${key}"][value="${value}"]`);
+      if (radio) radio.checked = true;
+    } else if (field.type === 'date') {
+      field.value = value ? value.split('T')[0] : '';
     } else {
-      field.value = value
+      field.value = value ?? '';
     }
-  })
+  });
 }
+
+
+
+
 function clearForm(type) {
   const form = document.querySelector(`.form[data-form="${type}"]`)
   form.reset()
+}
+async function fetchUsers() {
+  const res = await fetch('/api?action=user.index'); // или нужный тебе эндпоинт
+  const result = await res.json();
+
+  if (!result.success) {
+    throw new Error(result.error || 'Ошибка загрузки пользователей');
+  }
+
+  return result.data || [];
+}
+
+async function fetchProjects() {
+  const res = await fetch('/api?action=projects.index'); // или нужный тебе эндпоинт
+  const result = await res.json();
+
+  if (!result.success) {
+    throw new Error(result.error || 'Ошибка загрузки проектов');
+  }
+
+  return result.data || [];
+}
+
+async function loadUsersAndProjects() {
+  users = await fetchUsers();
+
+
+  projects = await fetchProjects();
 }
 
 
@@ -99,13 +181,19 @@ function initFormSubmit() {
       e.preventDefault();
 
       const data = Object.fromEntries(new FormData(form));
+      const type = form.dataset.form; // user | task | project
       const editId = form.dataset.editId;
 
       if (editId) {
-        updateUser(editId, data);
+        if (type === 'user') updateUser(editId, data);
+        if (type === 'task') updateTask(editId, data);
+        if (type === 'project') updateProject(editId, data);
+
         delete form.dataset.editId;
       } else {
-        createUser(data);
+        if (type === 'user') createUser(data);
+        if (type === 'task') createTask(data);
+        if (type === 'project') createProject(data);
       }
 
       form.reset();
@@ -113,6 +201,7 @@ function initFormSubmit() {
     });
   });
 }
+
 function mapRoleForDB(role) {
   switch (role) {
     case 'admin': return 'Администратор';
@@ -121,6 +210,74 @@ function mapRoleForDB(role) {
     default: return role; // на всякий случай
   }
 }
+
+async function createUser(data) {
+  try {
+    // Формируем тело запроса
+    const body = {
+      fullname: data.userName,
+      email: data.userEmail,
+      role: mapRoleForDB(data.userRole) // приводим к значению для базы
+    };
+
+    const response = await fetch(`/api?action=user.create`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error || 'Ошибка создания пользователя');
+    }
+
+    // result.data теперь содержит объект нового пользователя с id
+    const newUser = result.data;
+
+    console.log('User created:', newUser);
+
+    // Добавляем нового пользователя в DOM
+    addUserToDOM(newUser);
+
+    closeModal();
+
+  } catch (err) {
+    console.error('Create user failed:', err);
+    alert('Не удалось создать пользователя: ' + err.message);
+  }
+}
+
+function addUserToDOM(user) {
+  const template = document.querySelector('[data-user-template]');
+  if (!template) {
+    console.warn('User template not found, skip DOM update');
+    return;
+  }
+  const fragment = document.importNode(template.content, true);
+  const li = fragment.querySelector('.user-item');
+
+  li.dataset.id = user.id;
+  li.dataset.role = user.role;
+  li.dataset.email = user.email;
+
+  const nameEl = li.querySelector('[data-user-name]');
+  const createdEl = li.querySelector('[data-user-created]');
+
+  if (nameEl) nameEl.textContent = user.fullname;
+  if (createdEl) createdEl.textContent = 'Created: ' + new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' });
+
+  // Выбираем контейнер в зависимости от роли
+  const containerSelector = {
+    'Администратор': '[data-admin-container]',
+    'Исполнитель': '[data-employee-container]',
+    'Клиент': '[data-client-container]'
+  }[user.role] || '[data-employee-container]';
+
+  const container = document.querySelector(containerSelector);
+  if (container) container.appendChild(fragment);
+}
+
 async function updateUser(id, data) {
   try {
 
@@ -166,8 +323,6 @@ function updateUserInDOM(id, data) {
   if (nameEl) nameEl.textContent = data.userName;
 }
 
-
-
 async function deleteUser(id) {
   if (!confirm('Вы уверены, что хотите удалить этого пользователя?')) return;
 
@@ -198,7 +353,6 @@ function removeUserFromDOM(id) {
   if (li) li.remove();
 }
 
-
 function createEntity(type, data) {
   console.log('CREATE', type, data)
 }
@@ -207,21 +361,22 @@ function updateEntity(type, id, data) {
   console.log('UPDATE', type, id, data)
 }
 
-// временные заглушки (позже подключишь store / API)
-function createTask(data) {
-  console.log('Create task:', data)
-}
+async function createTask(data) {
 
-async function createUser(data) {
+
   try {
-    // Формируем тело запроса
     const body = {
-      fullname: data.userName,
-      email: data.userEmail,
-      role: mapRoleForDB(data.userRole) // приводим к значению для базы
+      Title: data.taskName,
+      Description: data.taskDescription,
+      ProjectID: data.taskProject,
+      TaskBy: data.taskBy,    // добавлено
+      ExecutorID: data.taskTo,
+      Status: mapTaskStatusForDB(data.taskStatus),
+      StartDate: data.taskStartDate,
+      EndDate: data.taskEndDate
     };
 
-    const response = await fetch(`/api?action=user.create`, {
+    const response = await fetch('/api?action=task.create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -230,56 +385,363 @@ async function createUser(data) {
     const result = await response.json();
 
     if (!result.success) {
-      throw new Error(result.error || 'Ошибка создания пользователя');
+      throw new Error(result.error || 'Ошибка создания задачи');
     }
 
-    // result.data теперь содержит объект нового пользователя с id
-    const newUser = result.data;
-
-    console.log('User created:', newUser);
-
-    // Добавляем нового пользователя в DOM
-    addUserToDOM(newUser);
-
+    const newTask = result.data;
+    console.log('Task created:', newTask);
+    await loadUsersAndProjects();
+    addTaskToDOM(newTask);
     closeModal();
 
   } catch (err) {
-    console.error('Create user failed:', err);
-    alert('Не удалось создать пользователя: ' + err.message);
+    console.error('Create task failed:', err);
+    alert('Не удалось создать задачу: ' + err.message);
   }
 }
 
-function addUserToDOM(user) {
-  const template = document.querySelector('[data-user-template]');
+function mapTaskStatusForDB(status) {
+  switch (status) {
+    case 'pending': return 'В работе';
+    case 'in-progress': return 'На проверке';
+    case 'done': return 'Выполнена';
+    default: return 'В работе';
+  }
+}
+function addTaskToDOM(task) {
+  const template = document.querySelector('[data-task-template]');
+  if (!template) return;
+
   const fragment = document.importNode(template.content, true);
-  const li = fragment.querySelector('.user-item');
+  const item = fragment.querySelector('.activity-item');
 
-  li.dataset.id = user.id;                
-  li.dataset.role = user.role;            
-  li.dataset.email = user.email;
+  item.dataset.id = task.id;
+  item.dataset.type = 'task';
+  item.dataset.taskBy = task.TaskBy;
+  item.dataset.taskTo = task.ExecutorID ?? '';
+  item.dataset.projectId = task.ProjectID ?? '';
 
-  const nameEl = li.querySelector('[data-user-name]');
-  const createdEl = li.querySelector('[data-user-created]');
+  // Название и описание
+  item.querySelector('[data-task-name]').textContent = task.Title || '—';
+  item.querySelector('[data-task-description]').textContent = task.Description || '—';
+  // taskBy
+  // project
+  const projHidden = item.querySelector('[data-task-project]');
+  if (projHidden) {
+    projHidden.dataset.projectId = task.ProjectID ?? '';
+  }
 
-  if (nameEl) nameEl.textContent = user.fullname;
-  if (createdEl) createdEl.textContent = 'Created: ' + new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' });
+  // taskBy
+  const byHidden = item.querySelector('[data-task-by]');
+  if (byHidden) {
+    byHidden.dataset.userId = task.TaskBy ?? '';
+  }
 
-  // Выбираем контейнер в зависимости от роли
-  const containerSelector = {
-    'Администратор': '[data-admin-container]',
-    'Исполнитель': '[data-employee-container]',
-    'Клиент': '[data-client-container]'
-  }[user.role] || '[data-employee-container]';
+  // taskTo
+  const toHidden = item.querySelector('[data-task-to]');
+  if (toHidden) {
+    toHidden.dataset.userId = task.ExecutorID ?? '';
+  }
 
-  const container = document.querySelector(containerSelector);
+  // Создатель
+  const creator = users.find(u => u.id == task.TaskBy);
+  const byEl = item.querySelector('[data-task-by-worker]');
+  if (byEl) {
+    byEl.dataset.userId = task.TaskBy ?? '';
+    byEl.textContent = creator?.fullname || '—';
+  }
+
+  // Исполнитель
+  const executor = users.find(u => u.id == task.ExecutorID);
+  const toEl = item.querySelector('[data-task-to-worker]');
+  if (toEl) {
+    toEl.dataset.userId = task.ExecutorID ?? '';
+    toEl.textContent = executor?.fullname || '—';
+  }
+
+  // Проект
+  const project = projects.find(p => p.id == task.ProjectID);
+  const projEl = item.querySelector('[data-task-project]');
+  if (projEl) {
+    projEl.dataset.projectId = task.ProjectID ?? '';
+    projEl.textContent = project?.title || '—';
+  }
+
+
+  // Скрытые поля для редактирования
+  const statusEl = item.querySelector('[data-task-status]');
+  if (statusEl) statusEl.textContent = task.Status || 'В работе';
+
+  const startEl = item.querySelector('[data-task-start-date]');
+  if (startEl) startEl.value = task.StartDate ? task.StartDate.split('T')[0] : '';
+
+  const endEl = item.querySelector('[data-task-end-date]');
+  if (endEl) endEl.value = task.EndDate ? task.EndDate.split('T')[0] : '';
+
+  const container = document.querySelector('[data-task-container]');
   if (container) container.appendChild(fragment);
+}
+
+async function updateTask(id, data) {
+  try {
+    const body = {
+      Title: data.taskName,
+      Description: data.taskDescription,
+      ProjectID: data.taskProject,
+      TaskBy: data.taskBy,    // добавлено
+      TaskTo: data.taskTo,
+      Status: mapTaskStatusForDB(data.taskStatus),
+      StartDate: data.taskStartDate,
+      EndDate: data.taskEndDate
+    };
+
+
+    const response = await fetch(`/api?action=task.update&id=${id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error || 'Ошибка обновления задачи');
+    }
+
+    console.log('Task updated:', data);
+
+    updateTaskInDOM(id, data);
+
+  } catch (err) {
+    console.error('Update task failed:', err);
+    alert('Не удалось обновить задачу: ' + err.message);
+  }
+}
+
+function updateTaskInDOM(id, data) {
+  const item = document.querySelector(`.activity-item[data-id="${id}"]`);
+  if (!item) return;
+
+
+  // Название и описание
+  item.querySelector('[data-task-name]').textContent = data.taskName || '—';
+  item.querySelector('[data-task-description]').textContent = data.taskDescription || '—';
+  const taskByHidden = item.querySelector('[data-task-by]');
+  if (taskByHidden) {
+    taskByHidden.dataset.userId = data.taskBy ?? '';
+  }
+
+  const byText = item.querySelector('[data-task-by-worker]');
+  if (byText) {
+    const user = users.find(u => String(u.id) === String(data.taskBy));
+    byText.textContent = user?.fullname || '—';
+  }
+
+  const taskToHidden = item.querySelector('[data-task-to]');
+  if (taskToHidden) {
+    taskToHidden.dataset.userId = data.taskTo ?? '';
+  }
+
+  const toText = item.querySelector('[data-task-to-worker]');
+  if (toText) {
+    const user = users.find(u => String(u.id) === String(data.taskTo));
+    toText.textContent = user?.fullname || '—';
+  }
+
+  // Создатель
+  const byEl = item.querySelector('[data-task-by-worker]');
+  if (byEl) {
+    byEl.dataset.userId = data.taskBy ?? '';
+    const creator = users.find(u => String(u.id) === String(data.taskBy));
+    byEl.textContent = creator?.fullname || '—';
+  }
+
+  // Исполнитель
+  const toEl = item.querySelector('[data-task-to-worker]');
+  if (toEl) {
+    toEl.dataset.userId = data.taskTo ?? '';
+    const executor = users.find(u => String(u.id) === String(data.taskTo));
+    toEl.textContent = executor?.fullname || '—';
+  }
+
+  // Проект
+  const projEl = item.querySelector('[data-task-project]');
+  if (projEl) {
+    projEl.dataset.projectId = data.taskProject ?? '';
+    const project = projects.find(p => String(p.id) === String(data.taskProject));
+    projEl.textContent = project?.title || '—';
+  }
+
+  // Статус
+  const statusEl = item.querySelector('[data-task-status]');
+  if (statusEl) statusEl.textContent = data.taskStatus || 'К выполнению';
+
+  // Даты
+  const startEl = item.querySelector('[data-task-start-date]');
+  if (startEl) startEl.value = data.taskStartDate ? data.taskStartDate.split('T')[0] : '';
+
+  const endEl = item.querySelector('[data-task-end-date]');
+  if (endEl) endEl.value = data.taskEndDate ? data.taskEndDate.split('T')[0] : '';
+}
+
+
+async function deleteTask(id) {
+  if (!confirm('Вы уверены, что хотите удалить эту задачу?')) return;
+
+  try {
+    const response = await fetch(`/api?action=task.delete&id=${id}`, {
+      method: 'POST' // можно 'DELETE', если API поддерживает
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error || 'Ошибка удаления задачи');
+    }
+
+    removeTaskFromDOM(id);
+
+    console.log('Task deleted:', id);
+
+  } catch (err) {
+    console.error('Delete task failed:', err);
+    alert('Не удалось удалить задачу: ' + err.message);
+  }
+}
+
+function removeTaskFromDOM(id) {
+  const item = document.querySelector(`.activity-item[data-id="${id}"]`);
+  if (item) item.remove();
 }
 
 
 
 
-function createProject(data) {
-  console.log('Create project:', data)
+
+async function createProject(data) {
+  try {
+    const body = {
+      title: data.projectName,
+      detaileddescription: data.projectDescription,
+      clientid: data.projectClient, // правильно
+      startdate: data.projectStartDate,
+      plannedenddate: data.projectEndDate,
+      status: "Черновик",
+    };
+
+    const res = await fetch('/api?action=projects.create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    const result = await res.json();
+    if (!result.success) throw new Error(result.error || 'Ошибка создания проекта');
+
+    addProjectToDOM(result.data);
+    closeModal();
+  } catch (err) {
+    console.error(err);
+    alert('Не удалось создать проект: ' + err.message);
+  }
+}
+
+
+function addProjectToDOM(project) {
+  const container = document.querySelector('[data-project-container]');
+  const template = document.querySelector('[data-project-template]');
+  if (!container || !template) return;
+
+  const fragment = document.importNode(template.content, true);
+  const item = fragment.querySelector('.project__item');
+
+  item.dataset.id = project.id;
+  item.dataset.type = 'project';
+
+  item.querySelector('[data-project-name]').textContent = project.title || '—';
+  item.querySelector('[data-project-description]').textContent = project.detaileddescription || '—';
+
+  item.querySelector('[data-project-active]').textContent = project.status || '—';
+
+  item.querySelector('[data-project-date]').textContent =
+    project.startdate ? project.startdate.split('T')[0] : '—';
+
+  item.querySelector('[data-project-assigned]').textContent =
+    project.client_fullname || '—';
+
+  // ===== скрытые данные =====
+  item.querySelector('[data-project-client]').dataset.userId = project.clientid ?? '';
+  item.querySelector('[data-project-status]').textContent = project.status ?? '';
+
+  item.querySelector('[data-project-date]').value =
+    project.plannedenddate ? project.plannedenddate.split('T')[0] : '';
+
+  container.appendChild(fragment);
+}
+
+async function updateProject(id, data) {
+  try {
+    const body = {
+      title: data.projectName || null,
+      detaileddescription: data.projectDescription || null,
+      clientid: data.projectClient || null,
+      startdate: data.projectStartDate || null,
+      plannedenddate: data.projectEndDate || null,
+      status: data.projectStatus || null,
+      managerid: data.projectClient || null
+    };
+
+    const response = await fetch(`/api?action=projects.update&id=${id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error || 'Ошибка обновления проекта');
+    }
+
+    console.log('Project updated:', result.data);
+    updateProjectInDOM(id, data);
+
+  } catch (err) {
+    console.error('Update project failed:', err);
+    alert('Update project failed: ' + err.message);
+  }
+}
+
+
+function updateProjectInDOM(id, data) {
+  const item = document.querySelector(`.project__item[data-id="${id}"]`);
+  if (!item) return;
+
+  item.querySelector('[data-project-name]').textContent = data.projectName || '—';
+  item.querySelector('[data-project-description]').textContent = data.projectDescription || '—';
+  item.querySelector('[data-project-active]').textContent = data.projectStatus || '—';
+  item.querySelector('[data-project-date]').value = data.projectEndDate || '';
+
+  // Можно обновить assigned (имя клиента) если нужно:
+  const client = users.find(u => String(u.id) === String(data.projectClient));
+  item.querySelector('[data-project-assigned]').textContent = client?.fullname || '—';
+}
+
+
+async function deleteProject(id) {
+  if (!confirm('Вы уверены, что хотите удалить проект?')) return;
+
+  try {
+    const res = await fetch(`/api?action=projects.delete&id=${id}`, { method: 'POST' });
+    const result = await res.json();
+    if (!result.success) throw new Error(result.error || 'Ошибка удаления проекта');
+
+    const el = document.querySelector(`.project__item[data-id="${id}"]`);
+    if (el) el.remove();
+  } catch (err) {
+    console.error(err);
+    alert('Не удалось удалить проект: ' + err.message);
+  }
 }
 
 function initModalButtons() {
@@ -297,28 +759,48 @@ function initModalButtons() {
     el.addEventListener('click', closeModal)
   })
 }
-document.addEventListener('click', e => {
-  const btn = e.target.closest('[data-edit-task]')
-  if (!btn) return
 
-  const taskData = {
-    id: 5,
-    taskName: 'Fix UI',
-    taskDescription: 'Modal redesign',
-    taskStatus: 'in-process',
-    taskBy: '1',
-    taskTo: '2',
-    taskStartDate: '2025-03-01',
-    taskEndDate: '2025-03-10'
-  }
+// document.addEventListener('click', e => {
+//   const btn = e.target.closest('[data-edit-task]')
+//   if (!btn) return
 
-  openModal({
-    type: 'task',
-    mode: 'edit',
-    data: taskData
-  })
-})
+//   const taskData = {
+//     id: 5,
+//     taskName: 'Fix UI',
+//     taskDescription: 'Modal redesign',
+//     taskStatus: 'in-process',
+//     taskBy: '1',
+//     taskTo: '2',
+//     taskStartDate: '2025-03-01',
+//     taskEndDate: '2025-03-10'
+//   }
 
+//   openModal({
+//     type: 'task',
+//     mode: 'edit',
+//     data: taskData
+//   })
+// })
+
+function populateSelect(selectEl, items, valueKey, textKey, selectedValue = '') {
+  if (!selectEl) return;
+  selectEl.innerHTML = ''; // очистим старые опции
+  const defaultOption = document.createElement('option');
+  defaultOption.value = '';
+  defaultOption.textContent = '— Select —';
+  selectEl.appendChild(defaultOption);
+
+  items.forEach(item => {
+    const option = document.createElement('option');
+    option.value = item[valueKey];
+    option.textContent = item[textKey];
+    if (String(item[valueKey]) === String(selectedValue)) {
+      option.selected = true;
+    }
+    selectEl.appendChild(option);
+  });
+
+}
 
 export function initCreateForm() {
   initModalButtons()
@@ -374,9 +856,9 @@ document.addEventListener('click', e => {
 
 function handleEdit(type, id) {
   const data = getEntityData(type, id);
+  console.log('Data from DOM before fillForm:', data);
   const form = document.querySelector(`.form[data-form="${type}"]`);
 
-  // Устанавливаем id редактируемого объекта
   form.dataset.editId = id;
 
   openModal({
@@ -385,31 +867,107 @@ function handleEdit(type, id) {
     data
   });
 }
+function mapTaskDataForForm(task) {
+  return {
+    taskName: task.Title || '',
+    taskDescription: task.Description || '',
+    taskProject: task.ProjectID || '',
+    taskBy: task.TaskBy || '',
+    taskTo: task.ExecutorID || '',
+    taskStatus: task.Status || '',
+    taskStartDate: task.StartDate || '',
+    taskEndDate: task.EndDate || ''
+  };
+}
 
 function getEntityData(type, id) {
   if (type === 'user') {
-    const li = document.querySelector(`.user-item[data-id="${id}"]`)
+    const li = document.querySelector(`.user-item[data-id="${id}"]`);
     return {
       id,
       userName: li.dataset.name || li.querySelector('[data-user-name]')?.textContent,
       userEmail: li.dataset.email,
       userRole: li.dataset.role
-    }
+    };
   }
-  // Для задач и проектов оставляем заглушку
-  return {
-    id,
-    taskName: 'Fix UI',
-    taskDescription: 'Modal redesign',
-    taskStatus: 'in-process',
-    taskBy: '1',
-    taskTo: '2'
+
+  if (type === 'task') {
+    const item = document.querySelector(`.activity-item[data-id="${id}"]`);
+
+    return {
+      id,
+      taskName: item.querySelector('[data-task-name]')?.textContent || '',
+      taskDescription: item.querySelector('[data-task-description]')?.textContent || '',
+      taskStatus: item.querySelector('[data-task-status]')?.textContent || '',
+
+      taskBy: item.querySelector('[data-task-by]')?.dataset.userId || '',
+      taskTo: item.querySelector('[data-task-to]')?.dataset.userId || '',
+      taskProject: item.querySelector('[data-task-project]')?.dataset.projectId || '',
+
+      taskStartDate: item.querySelector('[data-task-start-date]')?.value || '',
+      taskEndDate: item.querySelector('[data-task-end-date]')?.value || ''
+    };
   }
+
+
+
+  if (type === 'project') {
+    const el = document.querySelector(`.project__item[data-id="${id}"]`);
+
+    return {
+      id,
+      projectName: el.querySelector('[data-project-name]')?.textContent || '',
+      projectDescription: el.querySelector('[data-project-description]')?.textContent || '',
+      projectClient: el.querySelector('[data-project-client]')?.dataset.userId || '',
+      projectStatus: el.querySelector('[data-project-status]')?.textContent || '',
+      projectStartDate: el.querySelector('[data-project-start-date]')?.value || '',
+      projectEndDate: el.querySelector('[data-project-end-date]')?.value || ''
+    };
+  }
+
 }
 
+
 function handleDelete(type, id) {
-  if (type === 'user') {
-    deleteUser(id);
-  }
-  // для других сущностей потом добавим
+  if (type === 'user') deleteUser(id);
+  if (type === 'task') deleteTask(id);
+  if (type === 'project') deleteProject(id);
 }
+
+// document.addEventListener('click', e => {
+//   const btn = e.target.closest('[data-action]');
+//   if (!btn) return;
+
+//   const action = btn.dataset.action;
+//   const item = btn.closest('.activity-item'); // ищем именно activity-item
+//   if (!item) return;
+
+//   const type = item.dataset.type;
+//   const id = item.dataset.id;
+
+//   if (!id) {
+//     console.error('Не удалось найти ID задачи для удаления');
+//     return;
+//   }
+
+//   if (action === 'edit') handleEdit(type, id);
+//   if (action === 'delete') {
+//     if (type === 'task') deleteTask(id);
+//     if (type === 'user') deleteUser(id);
+//     if (type === 'project') deleteProject(id);
+//   }
+// });
+document.addEventListener('click', e => {
+  const btn = e.target.closest('[data-action="delete"]');
+  if (!btn) return;
+
+  const item = btn.closest('.activity-item');
+  if (!item) return;
+
+  const id = item.dataset.id;
+  const type = item.dataset.type;
+
+  if (type === 'task') {
+    deleteTask(id);
+  }
+});

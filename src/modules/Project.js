@@ -1,87 +1,96 @@
 class Project {
-    root = {
-        dataTemplate: "[data-project-template]",
-        dataName: "[data-project-name]",
-        dataDescription: "[data-project-description]",
-        dataActive: "[data-project-active]",
-        dataActiveIcon: "[data-project-active-icon]",
-        dataDate: "[data-project-date]",
-        dataCountTask: "[data-project-count-task]",
-        dataAssigned: "[data-project-assigned]",
-        dataProjectContainer: "[data-project-container]",
-        dataTotal: "[data-total-projects]",
-    };
+  root = {
+    dataTemplate: '[data-project-template]',
+    dataContainer: '[data-project-container]',
+    dataTotal: '[data-total-projects]'
+  };
 
-    projectList = [
-        {
-            name: 'React JS 01',
-            description: 'Project Regarding creating a dash in react js using Next Js as backend and APIs.',
-            active: 'Inactive',
-            date: '1 Jun 25',
-            countTask: '12 Tasks',
-            assigned: '6 Assigned',
-        },
-        {
-            name: 'React JS 01',
-            description: 'Project Regarding creating a dash in react js using Next Js as backend and APIs.',
-            active: 'Inactive',
-            date: '1 Jun 25',
-            countTask: '12 Tasks',
-            assigned: '6 Assigned',
-        },
-        {
-            name: 'React JS 01',
-            description: 'Project Regarding creating a dash in react js using Next Js as backend and APIs.',
-            active: 'Active',
-            date: '1 Jun 25',
-            countTask: '12 Tasks',
-            assigned: '6 Assigned',
-        },
-    ];
+  projectList = [];
 
-    constructor() {
-        this.render();
-        this.renderInfoToDashboard()
+  constructor() {
+    this.loadAndRender();
+  }
+
+  async loadAndRender() {
+    try {
+      const projects = await this.fetchProjects();
+      this.projectList = projects;
+      this.render();
+      this.renderInfoToDashboard();
+    } catch (e) {
+      console.error('Ошибка загрузки проектов:', e);
+    }
+  }
+
+  async fetchProjects() {
+    const res = await fetch('/api?action=projects.index');
+    const result = await res.json();
+
+    if (!result.success) {
+      throw new Error(result.error || 'Ошибка API');
     }
 
-    render() {
-        const projectContainer = document.querySelector(this.root.dataProjectContainer);
-        const template = document.querySelector(this.root.dataTemplate);
+    return result.data || [];
+  }
 
-        if (!projectContainer || !template) return;
+  render() {
+    const container = document.querySelector(this.root.dataContainer);
+    const template = document.querySelector(this.root.dataTemplate);
+    if (!container || !template) return;
 
-        this.projectList.forEach(project => {
-            const projectElement = this.createProjectLayout(project, template);
-            projectContainer.appendChild(projectElement);
-        });
+    container.innerHTML = '';
 
-    }
+    this.projectList.forEach(project => {
+      const fragment = this.createProjectLayout(project, template);
+      container.appendChild(fragment);
+    });
+  }
 
-    renderInfoToDashboard() {
-        const totalElement = document.querySelector(this.root.dataTotal);
-        if (!totalElement || !totalElement.textContent) return;
-        totalElement.textContent = String(this.projectList.length);
-    }
+  renderInfoToDashboard() {
+    const el = document.querySelector(this.root.dataTotal);
+    if (el) el.textContent = String(this.projectList.length);
+  }
 
-    createProjectLayout(project, template) {
-        const { name, description, active, date, countTask, assigned } = project;
-        const projectElement = document.importNode(template.content, true);
+  createProjectLayout(project, template) {
+    const fragment = document.importNode(template.content, true);
+    const item = fragment.querySelector('.project__item');
 
-        projectElement.querySelector(this.root.dataName).textContent = name;
-        projectElement.querySelector(this.root.dataDescription).textContent = description;
-        projectElement.querySelector(this.root.dataActive).textContent = active;
-        if (projectElement.querySelector(this.root.dataActive).textContent === 'Inactive') {
-            projectElement.querySelector(this.root.dataActiveIcon).src = 'src/assets/icons/inactive.svg';
-        }
-        else {
-            projectElement.querySelector(this.root.dataActiveIcon).src = 'src/assets/icons/active.svg';
-        }
-        projectElement.querySelector(this.root.dataDate).textContent = date;
-        projectElement.querySelector(this.root.dataCountTask).textContent = countTask;
-        projectElement.querySelector(this.root.dataAssigned).textContent = assigned;
+    item.dataset.id = project.id;
+    item.dataset.type = 'project';
 
-        return projectElement;
-    }
+    item.querySelector('[data-project-name]').textContent =
+      project.title || '—';
+
+    item.querySelector('[data-project-description]').textContent =
+      project.detaileddescription || '—';
+
+    item.querySelector('[data-project-active]').textContent =
+      project.status || '—';
+
+    item.querySelector('[data-project-date]').textContent =
+      project.startdate ? project.startdate.split('T')[0] : '—';
+
+    const assignedEl = item.querySelector('[data-project-assigned]');
+    assignedEl.textContent = project.client_fullname || '—';
+    assignedEl.dataset.userId = project.clientid || '';
+
+    return fragment;
+  }
+
+  async deleteProject(id) {
+    if (!confirm('Удалить проект?')) return;
+
+    const res = await fetch(`/api?action=projects.delete&id=${id}`, {
+      method: 'POST'
+    });
+
+    const result = await res.json();
+    if (!result.success) throw new Error(result.error);
+
+    this.projectList = this.projectList.filter(p => p.id != id);
+    this.render();
+    this.renderInfoToDashboard();
+  }
 }
 
 export default Project;

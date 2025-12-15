@@ -18,21 +18,14 @@ require_once __DIR__ . '/models/ProjectModel.php';
 require_once __DIR__ . '/controllers/ProjectController.php';
 require_once __DIR__ . '/models/TaskModel.php';
 require_once __DIR__ . '/controllers/TaskController.php';
-require_once __DIR__ . '/models/ReportModel.php';
-require_once __DIR__ . '/controllers/ReportController.php';
-require_once __DIR__ . '/models/ResourceModel.php';
-require_once __DIR__ . '/controllers/ResourceController.php';
-require_once __DIR__ . '/models/TaskResourceModel.php';        // ← новое
-require_once __DIR__ . '/controllers/TaskResourceController.php'; // ← новое
+
 
 try {
     // Инициализация контроллеров
     $userCtrl = new UserController();
     $projectCtrl = new ProjectController();
     $taskCtrl = new TaskController();
-    $reportCtrl = new ReportController();
-    $resourceCtrl = new ResourceController();
-    $taskResourceCtrl = new TaskResourceController();  // ← новое
+
 
     $action = $_GET['action'] ?? 'user.index';
     $id = $_GET['id'] ?? null;
@@ -64,7 +57,7 @@ try {
             }
             break;
 
-        case 'tasks':
+        case 'task':
             switch ($method) {
                 case 'index': $taskCtrl->index(); break;
                 case 'get': $taskCtrl->get($id); break;
@@ -74,42 +67,6 @@ try {
                 case 'byProject': $taskCtrl->byProject($id); break;
                 case 'byExecutor': $taskCtrl->byExecutor($id); break;
                 default: throw new Exception("Неизвестный метод: tasks.$method", 404);
-            }
-            break;
-
-        case 'reports':
-            switch ($method) {
-                case 'index': $reportCtrl->index(); break;
-                case 'get': $reportCtrl->get($id); break;
-                case 'create': $reportCtrl->create(); break;
-                case 'delete': $reportCtrl->delete($id); break;
-                case 'byUser': $reportCtrl->byUser($id); break;
-                case 'filter': $reportCtrl->filter(); break;
-                default: throw new Exception("Неизвестный метод: reports.$method", 404);
-            }
-            break;
-
-        case 'resources':
-            switch ($method) {
-                case 'index': $resourceCtrl->index(); break;
-                case 'get': $resourceCtrl->get($id); break;
-                case 'create': $resourceCtrl->create(); break;
-                case 'update': $resourceCtrl->update($id); break;
-                case 'delete': $resourceCtrl->delete($id); break;
-                case 'filter': $resourceCtrl->filter(); break;
-                case 'summary': $resourceCtrl->summary(); break;
-                default: throw new Exception("Неизвестный метод: resources.$method", 404);
-            }
-            break;
-
-        case 'taskresources':
-            switch ($method) {
-                case 'assign': $taskResourceCtrl->assign(); break;
-                case 'remove': $taskResourceCtrl->remove(); break;
-                case 'byTask': $taskResourceCtrl->byTask($id); break;
-                case 'byResource': $taskResourceCtrl->byResource($id); break;
-                case 'all': $taskResourceCtrl->all(); break;
-                default: throw new Exception("Неизвестный метод: taskresources.$method", 404);
             }
             break;
 

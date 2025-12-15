@@ -4,234 +4,155 @@
 class TaskModel {
     private $pdo;
 
-    private const ALLOWED_PRIORITIES = ['Высокий', 'Средний', 'Низкий'];
-    private const ALLOWED_STATUSES = ['К выполнению', 'В работе', 'На проверке', 'Выполнена'];
+    private const ALLOWED_STATUSES = ['В работе', 'На проверке', 'Выполнена'];
 
     public function __construct() {
         $this->pdo = Database::getInstance();
     }
 
-    // Получить все задачи (с проектом и исполнителем)
-    public function getAllTasks($withRelations = true) {
-        $sql = '
-            SELECT 
-                t.ID,
-                t.Title,
-                t.Description,
-                t.ProjectID,
-                t.ExecutorID,
-                t.CreationDate,
-                t.PlannedStartDate,
-                t.PlannedEndDate,
-                t.ActualStartDate,
-                t.ActualEndDate,
-                t.Priority,
-                t.Status
-        ';
+    // Получить все задачи с проектом и исполнителем
+public function getAllTasks() {
+    $sql = '
+        SELECT 
+            t.ID,
+            t.Title,
+            t.Description,
+            t.ProjectID,
+            t.TaskTo,
+            t.TaskBy,
+            t.Status,
+            t.StartDate,
+            t.EndDate,
+            p.Title AS project_title,
+            u_executor.fullname AS executor_fullname,
+            u_creator.fullname AS creator_fullname
+        FROM "task" t
+        LEFT JOIN "project" p ON p.ID = t.ProjectID
+        LEFT JOIN "User" u_executor ON u_executor.ID = t.TaskTo
+        LEFT JOIN "User" u_creator ON u_creator.ID = t.TaskBy
+        ORDER BY t.ID DESC
+    ';
 
-        if ($withRelations) {
-            $sql .= ',
-                p.Title AS project_title,
-                u.fullname AS executor_fullname,
-                u.login AS executor_login
-            ';
-        }
+    $stmt = $this->pdo->query($sql);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
-        $sql .= '
-            FROM "Task" t
-            LEFT JOIN "Project" p ON p.ID = t.ProjectID
-            LEFT JOIN "User" u ON u.ID = t.ExecutorID
-            ORDER BY t.CreationDate DESC, t.Priority DESC
-        ';
-
-        $stmt = $this->pdo->query($sql);
-        return $stmt->fetchAll();
-    }
 
     // Получить задачу по ID
     public function getTaskById($id) {
-        $sql = '
+        $stmt = $this->pdo->prepare('
             SELECT 
                 t.ID,
                 t.Title,
                 t.Description,
                 t.ProjectID,
-                t.ExecutorID,
-                t.CreationDate,
-                t.PlannedStartDate,
-                t.PlannedEndDate,
-                t.ActualStartDate,
-                t.ActualEndDate,
-                t.Priority,
+                t.TaskTo,
+                t.TaskBy,
                 t.Status,
+                t.StartDate,
+                t.EndDate,
                 p.Title AS project_title,
-                u.fullname AS executor_fullname,
-                u.login AS executor_login
-            FROM "Task" t
-            LEFT JOIN "Project" p ON p.ID = t.ProjectID
-            LEFT JOIN "User" u ON u.ID = t.ExecutorID
+                u.fullname AS executor_fullname
+            FROM "task" t
+            LEFT JOIN "project" p ON p.ID = t.ProjectID
+            LEFT JOIN "User" u ON u.ID = t.TaskTo
             WHERE t.ID = :id
-        ';
-        $stmt = $this->pdo->prepare($sql);
+        ');
         $stmt->execute(['id' => $id]);
-        return $stmt->fetch();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     // Создать задачу
-    public function createTask($title, $description, $projectID, $executorID, $plannedStart, $plannedEnd, $actualStart, $actualEnd, $priority, $status) {
-        // Валидация статуса и приоритета
-        if ($priority && !in_array($priority, self::ALLOWED_PRIORITIES)) {
-            throw new InvalidArgumentException("Недопустимый приоритет: $priority");
-        }
-        if ($status && !in_array($status, self::ALLOWED_STATUSES)) {
+    public function createTask($title, $description, $projectID, $TaskTo, $taskBy, $startDate = null, $endDate = null, $status = 'К выполнению') {
+        if (!in_array($status, self::ALLOWED_STATUSES)) {
             throw new InvalidArgumentException("Недопустимый статус: $status");
         }
 
-        // Проверка существования ProjectID
-        $projExists = $this->pdo->prepare('SELECT 1 FROM "Project" WHERE ID = :id');
-        $projExists->execute(['id' => $projectID]);
-        if (!$projExists->fetch()) {
-            throw new InvalidArgumentException("Проект с ID $projectID не найден");
-        }
+        // Проверка существования проекта
+        $stmt = $this->pdo->prepare('SELECT 1 FROM "project" WHERE ID = :id');
+        $stmt->execute(['id' => $projectID]);
+        if (!$stmt->fetch()) throw new InvalidArgumentException("Проект с ID $projectID не найден");
 
-        // Проверка ExecutorID (может быть NULL)
-        if ($executorID !== null) {
-            $userExists = $this->pdo->prepare('SELECT 1 FROM "User" WHERE ID = :id');
-            $userExists->execute(['id' => $executorID]);
-            if (!$userExists->fetch()) {
-                throw new InvalidArgumentException("Исполнитель с ID $executorID не найден");
-            }
+        // Проверка исполнителя (может быть NULL)
+        if ($TaskTo !== null) {
+            $stmt = $this->pdo->prepare('SELECT 1 FROM "User" WHERE ID = :id');
+            $stmt->execute(['id' => $TaskTo]);
+            if (!$stmt->fetch()) throw new InvalidArgumentException("Исполнитель с ID $TaskTo не найден");
         }
 
         $stmt = $this->pdo->prepare('
-            INSERT INTO "Task" (
-                Title, Description, ProjectID, ExecutorID,
-                PlannedStartDate, PlannedEndDate, ActualStartDate, ActualEndDate,
-                Priority, Status
-            ) VALUES (
-                :title, :description, :projectID, :executorID,
-                :plannedStart, :plannedEnd, :actualStart, :actualEnd,
-                :priority, :status
-            )
+            INSERT INTO "task" (Title, Description, ProjectID, TaskTo, TaskBy, StartDate, EndDate, Status)
+            VALUES (:title, :description, :projectID, :TaskTo, :taskBy, :startDate, :endDate, :status)
             RETURNING ID
         ');
 
         $stmt->execute([
             'title' => $title,
-            'description' => $description ?? null,
+            'description' => $description,
             'projectID' => $projectID,
-            'executorID' => $executorID,
-            'plannedStart' => $plannedStart ?: null,
-            'plannedEnd' => $plannedEnd ?: null,
-            'actualStart' => $actualStart ?: null,
-            'actualEnd' => $actualEnd ?: null,
-            'priority' => $priority ?: 'Средний',
-            'status' => $status ?: 'К выполнению'
+            'TaskTo' => $TaskTo,
+            'taskBy' => $taskBy,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'status' => $status
         ]);
 
         return $stmt->fetchColumn();
     }
 
     // Обновить задачу
-    public function updateTask($id, $title, $description, $projectID, $executorID, $plannedStart, $plannedEnd, $actualStart, $actualEnd, $priority, $status) {
-        // Валидация
-        if ($priority !== null && !in_array($priority, self::ALLOWED_PRIORITIES)) {
-            throw new InvalidArgumentException("Недопустимый приоритет: $priority");
-        }
-        if ($status !== null && !in_array($status, self::ALLOWED_STATUSES)) {
-            throw new InvalidArgumentException("Недопустимый статус: $status");
-        }
-
-        // Проверки существования (если поля меняются)
-        if ($projectID !== null) {
-            $projExists = $this->pdo->prepare('SELECT 1 FROM "Project" WHERE ID = :id');
-            $projExists->execute(['id' => $projectID]);
-            if (!$projExists->fetch()) {
-                throw new InvalidArgumentException("Проект с ID $projectID не найден");
-            }
-        }
-
-        if ($executorID !== null) {
-            if ($executorID !== '') { // явно задан
-                $userExists = $this->pdo->prepare('SELECT 1 FROM "User" WHERE ID = :id');
-                $userExists->execute(['id' => $executorID]);
-                if (!$userExists->fetch()) {
-                    throw new InvalidArgumentException("Исполнитель с ID $executorID не найден");
-                }
-            } else {
-                $executorID = null; // пустая строка → null
-            }
-        }
-
-        // Подготовка UPDATE
+    public function updateTask($id, $data) {
         $fields = [];
         $params = ['id' => $id];
 
-        if ($title !== null) $fields[] = 'Title = :title'; $params['title'] = $title;
-        if ($description !== null) $fields[] = 'Description = :description'; $params['description'] = $description;
-        if ($projectID !== null) $fields[] = 'ProjectID = :projectID'; $params['projectID'] = $projectID;
-        if ($executorID !== null) $fields[] = 'ExecutorID = :executorID'; $params['executorID'] = $executorID;
-        if ($plannedStart !== null) $fields[] = 'PlannedStartDate = :plannedStart'; $params['plannedStart'] = $plannedStart ?: null;
-        if ($plannedEnd !== null) $fields[] = 'PlannedEndDate = :plannedEnd'; $params['plannedEnd'] = $plannedEnd ?: null;
-        if ($actualStart !== null) $fields[] = 'ActualStartDate = :actualStart'; $params['actualStart'] = $actualStart ?: null;
-        if ($actualEnd !== null) $fields[] = 'ActualEndDate = :actualEnd'; $params['actualEnd'] = $actualEnd ?: null;
-        if ($priority !== null) $fields[] = 'Priority = :priority'; $params['priority'] = $priority;
-        if ($status !== null) $fields[] = 'Status = :status'; $params['status'] = $status;
+        foreach (['Title', 'Description', 'ProjectID', 'TaskTo', 'TaskBy', 'StartDate', 'EndDate', 'Status'] as $field) {
+            if (isset($data[$field])) {
+                if ($field === 'Status' && !in_array($data[$field], self::ALLOWED_STATUSES)) {
+                    throw new InvalidArgumentException("Недопустимый статус: {$data[$field]}");
+                }
+                $fields[] = "$field = :$field";
+                $params[$field] = $data[$field];
+            }
+        }
 
         if (empty($fields)) {
             throw new InvalidArgumentException("Нет данных для обновления");
         }
 
-        $sql = 'UPDATE "Task" SET ' . implode(', ', $fields) . ' WHERE ID = :id';
+        $sql = 'UPDATE "task" SET ' . implode(', ', $fields) . ' WHERE ID = :id';
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute($params);
     }
 
     // Удалить задачу
     public function deleteTask($id) {
-        $stmt = $this->pdo->prepare('DELETE FROM "Task" WHERE ID = :id');
+        $stmt = $this->pdo->prepare('DELETE FROM "task" WHERE ID = :id');
         return $stmt->execute(['id' => $id]);
     }
 
-    // ✅ Дополнительно: получить задачи по проекту
+    // Получить задачи по проекту
     public function getTasksByProject($projectID) {
-        $sql = '
-            SELECT 
-                t.ID, t.Title, t.Description, t.Priority, t.Status,
-                t.PlannedStartDate, t.PlannedEndDate, t.ActualEndDate,
-                u.fullname AS executor_fullname
-            FROM "Task" t
-            LEFT JOIN "User" u ON u.ID = t.ExecutorID
+        $stmt = $this->pdo->prepare('
+            SELECT t.ID, t.Title, t.Description, t.Status, t.StartDate, t.EndDate, u.fullname AS executor_fullname
+            FROM "task" t
+            LEFT JOIN "User" u ON u.ID = t.TaskTo
             WHERE t.ProjectID = :projectID
-            ORDER BY 
-                CASE t.Status 
-                    WHEN \'К выполнению\' THEN 1
-                    WHEN \'В работе\' THEN 2
-                    WHEN \'На проверке\' THEN 3
-                    WHEN \'Выполнена\' THEN 4
-                    ELSE 5
-                END,
-                t.Priority DESC
-        ';
-        $stmt = $this->pdo->prepare($sql);
+            ORDER BY t.Status, t.EndDate ASC
+        ');
         $stmt->execute(['projectID' => $projectID]);
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // ✅ Дополнительно: получить задачи по исполнителю
-    public function getTasksByExecutor($executorID) {
-        $sql = '
-            SELECT 
-                t.ID, t.Title, t.Status, t.Priority,
-                p.Title AS project_title,
-                t.PlannedEndDate
-            FROM "Task" t
+    // Получить задачи по исполнителю
+    public function getTasksByExecutor($TaskTo) {
+        $stmt = $this->pdo->prepare('
+            SELECT t.ID, t.Title, t.Description, t.Status, t.StartDate, t.EndDate, p.Title AS project_title
+            FROM "task" t
             LEFT JOIN "Project" p ON p.ID = t.ProjectID
-            WHERE t.ExecutorID = :executorID
-            ORDER BY t.PlannedEndDate ASC NULLS LAST
-        ';
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute(['executorID' => $executorID]);
-        return $stmt->fetchAll();
+            WHERE t.TaskTo = :TaskTo
+            ORDER BY t.EndDate ASC
+        ');
+        $stmt->execute(['TaskTo' => $TaskTo]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

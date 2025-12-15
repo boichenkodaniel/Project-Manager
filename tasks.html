@@ -1,113 +1,115 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tasks - Project Manager</title>
     <script type="module" src="/src/main.js"></script>
 </head>
+
 <body>
-<div class="wrapper">
-    <aside class="aside">
-        <div class="profile">
-            <div class="profile__img-box">
-                <img src="src/assets/icons/profile.svg" alt="Profile photo" class="profile__img">
+    <div class="wrapper">
+        <aside class="aside">
+            <div class="profile">
+                <div class="profile__img-box">
+                    <img src="src/assets/icons/profile.svg" alt="Profile photo" class="profile__img">
+                </div>
+                <div class="profile__info">
+                    <h2 class="profile__name">Bhargav Joshi & Team</h2>
+                    <p class="profile__email">bhargavjoshi1237@gmail.com</p>
+                </div>
             </div>
-            <div class="profile__info">
-                <h2 class="profile__name">Bhargav Joshi & Team</h2>
-                <p class="profile__email">bhargavjoshi1237@gmail.com</p>
-            </div>
-        </div>
-        <nav class="navigation">
-            <ul class="nav-list">
-                <li class="nav-item">
-                    <a href="index.html" class="nav-link">
-                        <img src="src/assets/icons/dashboard.svg" alt="" loading="lazy"/>
-                        <p>Dashboard</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="tasks.html" class="nav-link nav-link--active">
-                        <img src="src/assets/icons/tasks.svg" alt="" loading="lazy"/>
-                        <p>Tasks</p>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-
-        <!-- Остальной сайдбар как в index.html -->
-        <hr class="nav-divider"/>
-
-        <section class="projects-section">
             <nav class="navigation">
                 <ul class="nav-list">
                     <li class="nav-item">
-                        <a href="projects.html" class="nav-link">
-                            <img src="src/assets/icons/all-projects.svg" alt="" loading="lazy" />
-                            <p>All Projects</p>
+                        <a href="index.html" class="nav-link">
+                            <img src="src/assets/icons/dashboard.svg" alt="" loading="lazy" />
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="tasks.html" class="nav-link nav-link--active">
+                            <img src="src/assets/icons/tasks.svg" alt="" loading="lazy" />
+                            <p>Tasks</p>
                         </a>
                     </li>
                 </ul>
             </nav>
-            <ul class="projects-sub-list">
-                <li class="projects-sub-item">
-                    <a href="#project-1" class="project-link">
-                        <p class="project__name">Project 1</p>
-                        <p class="project__counter">45</p>
-                    </a>
-                </li>
-                <li class="projects-sub-item">
-                    <a href="#project-2" class="project-link">
-                        <p class="project__name">Project 2</p>
-                        <p class="project__counter">145</p>
-                    </a>
-                </li>
-                <li class="projects-sub-item">
-                    <a href="#project-3" class="project-link">
-                        <p class="project__name">Project 3</p>
-                        <p class="project__counter">12</p>
-                    </a>
-                </li>
-            </ul>
-        </section>
 
-        <hr class="nav-divider"/>
+            <!-- Остальной сайдбар как в index.html -->
+            <hr class="nav-divider" />
 
-        <nav class="navigation">
-            <ul class="nav-list">
-                <li class="nav-item">
-                    <a href="users.html" class="nav-link">
-                        <img src="src/assets/icons/users.svg" alt="" loading="lazy"/>
-                        <p>All Users</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="issues.html" class="nav-link">
-                        <img src="src/assets/icons/issues.svg" alt="" loading="lazy"/>
-                        <p>Issues</p>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-        <button class="nav-button" data-open="task">
-            <img src="src/assets/icons/plus.svg" alt="" loading="lazy" />
-        </button>
-    </aside>
-    <main class="main">
-        <header class="main__header">
-            <h1>Tasks</h1>
-            <img class="logo" src="src/assets/icons/logo.svg" alt="" loading="lazy" />
-        </header>
-        <hr />
-        <div class="task__content">
-            <div class="main__activities">
-                <ul class="activity-list" data-task-container>
-
+            <section class="projects-section">
+                <nav class="navigation">
+                    <ul class="nav-list">
+                        <li class="nav-item">
+                            <a href="projects.html" class="nav-link">
+                                <img src="src/assets/icons/all-projects.svg" alt="" loading="lazy" />
+                                <p>All Projects</p>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <ul class="projects-sub-list">
+                    <li class="projects-sub-item">
+                        <a href="#project-1" class="project-link">
+                            <p class="project__name">Project 1</p>
+                            <p class="project__counter">45</p>
+                        </a>
+                    </li>
+                    <li class="projects-sub-item">
+                        <a href="#project-2" class="project-link">
+                            <p class="project__name">Project 2</p>
+                            <p class="project__counter">145</p>
+                        </a>
+                    </li>
+                    <li class="projects-sub-item">
+                        <a href="#project-3" class="project-link">
+                            <p class="project__name">Project 3</p>
+                            <p class="project__counter">12</p>
+                        </a>
+                    </li>
                 </ul>
+            </section>
+
+            <hr class="nav-divider" />
+
+            <nav class="navigation">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="users.html" class="nav-link">
+                            <img src="src/assets/icons/users.svg" alt="" loading="lazy" />
+                            <p>All Users</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="issues.html" class="nav-link">
+                            <img src="src/assets/icons/issues.svg" alt="" loading="lazy" />
+                            <p>Issues</p>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <button class="nav-button" data-open="task">
+                <img src="src/assets/icons/plus.svg" alt="" loading="lazy" />
+            </button>
+        </aside>
+        <main class="main">
+            <header class="main__header">
+                <h1>Tasks</h1>
+                <img class="logo" src="src/assets/icons/logo.svg" alt="" loading="lazy" />
+            </header>
+            <hr />
+            <div class="task__content">
+                <div class="main__activities">
+                    <ul class="activity-list" data-task-container>
+
+                    </ul>
+                </div>
             </div>
-        </div>
-    </main>
-</div>
+        </main>
+    </div>
     <div class="modal hidden" id="create-modal">
         <div class="modal__overlay" data-close-modal></div>
 
@@ -136,25 +138,21 @@
 
                     <label for="taskDescription">Description</label>
                     <textarea name="taskDescription" id="taskDescription"></textarea>
+                    <label for="taskProject">Project</label>
+                    <select name="taskProject" id="taskProject" required>
 
+                    </select>
                     <div class="form-row">
                         <div class="form-field">
                             <label for="taskBy">Assigned by</label>
-                            <select name="taskBy" id="taskBy">
-                                    <option value=""> Select user </option>
-                                    <option value="1">John Smith</option>
-                                    <option value="2">Anna Brown</option>
-                                    <option value="3">Mike Johnson</option>
+                            <select name="taskBy" id="taskBy" required>
+
                             </select>
                         </div>
 
                         <div class="form-field">
                             <label for="taskTo">Assigned to</label>
-                            <select name="taskTo" id="taskTo">
-                                    <option value="">— Select user —</option>
-                                    <option value="1">John Smith</option>
-                                    <option value="2">Anna Brown</option>
-                                    <option value="3">Mike Johnson</option>
+                            <select name="taskTo" id="taskTo" required>
                             </select>
                         </div>
                     </div>
@@ -252,10 +250,10 @@
 
                     <label for="projectClient">Client</label>
                     <select name="projectClient" id="projectClient">
-                            <option value="">— Select user —</option>
-    <option value="1">John Smith</option>
-    <option value="2">Anna Brown</option>
-    <option value="3">Mike Johnson</option>
+                        <option value="">— Select user —</option>
+                        <option value="1">John Smith</option>
+                        <option value="2">Anna Brown</option>
+                        <option value="3">Mike Johnson</option>
                     </select>
 
                     <div class="form-row">
@@ -277,40 +275,46 @@
             </div>
         </div>
     </div>
-<template data-task-template>
-    <li class="activity-item" data-id="5" data-type="task">
-        <div class="activity-item-inner">
-            <div class="activity-item__icon-box">
-                <div class="activity-item__icon">
-                    <img src="src/assets/icons/task.svg" alt="" width="25" height="23"
-                         loading="lazy" />
+    <template data-task-template>
+        <li class="activity-item" data-id="5" data-type="task">
+            <div class="activity-item-inner">
+                <div class="activity-item__icon-box">
+                    <div class="activity-item__icon">
+                        <img src="src/assets/icons/task.svg" alt="" width="25" height="23" loading="lazy" />
+                    </div>
+                </div>
+                <div class="activity-item__info">
+                    <h3 class="activity-item__name" data-task-name></h3>
+                    <p class="activity-item__description" data-task-description></p>
                 </div>
             </div>
-            <div class="activity-item__info">
-                <h3 class="activity-item__name" data-task-name></h3>
-                <p class="activity-item__description" data-task-description></p>
-            </div>
-        </div>
-        <div class="activity-item-last">
             <div class="activity-item-last">
                 <div class="activity-item-last__content">
                     <div class="activity-item__by">
                         <div class="activity-item__by-icon-box">
                             <img src="src/assets/icons/by.svg" alt="" class="activity-item__by-icon" />
                         </div>
-                        <p class="activity-item__by-worker" data-task-by-worker></p>
+                        <p class="activity-item__by-worker" data-task-by-worker data-user-id=""></p>
                     </div>
                     <div class="activity-item__to">
                         <div class="activity-item__to-icon-box">
-                            <img src="src/assets/icons/to.svg" alt="" class="activity-item__to-icon"/>
+                            <img src="src/assets/icons/to.svg" alt="" class="activity-item__to-icon" />
                         </div>
-                        <p class="activity-item__to-worker" data-task-to-worker></p>
+                        <p class="activity-item__to-worker" data-task-to-worker data-user-id=""></p>
                     </div>
                 </div>
+
+                <!-- Дополнительные скрытые поля для данных, которые нужны при редактировании -->
+                <span data-task-project data-project-id="" style="display:none;"></span>
+                <span data-task-status style="display:none;"></span>
+                <span data-task-by data-user-id="" style="display:none;"></span>
+                <span data-task-to data-user-id="" style="display:none;"></span>
+                <input type="hidden" data-task-start-date>
+                <input type="hidden" data-task-end-date>
+
                 <div class="action-menu" data-actions>
                     <button class="action-menu__trigger" type="button">
-                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height=""
-                         loading="lazy" />
+                        <img src="src/assets/icons/actions-menu.svg" alt="" width="" height="" loading="lazy" />
                     </button>
 
                     <div class="action-menu__dropdown hidden">
@@ -319,7 +323,9 @@
                     </div>
                 </div>
             </div>
-    </li>
-</template>
+        </li>
+    </template>
+
 </body>
+
 </html>
