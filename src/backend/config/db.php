@@ -7,9 +7,9 @@ class Database {
 
     private function __construct() {
         $host = 'localhost';
-        $dbname = 'Project-manager';
+        $dbname = 'Project-manager1';
         $username = 'postgres';
-        $password = 'pg123';
+        $password = 'postgres';
 
         try {
             $this->pdo = new PDO(

@@ -18,8 +18,6 @@ require_once __DIR__ . '/models/ProjectModel.php';
 require_once __DIR__ . '/controllers/ProjectController.php';
 require_once __DIR__ . '/models/TaskModel.php';
 require_once __DIR__ . '/controllers/TaskController.php';
-require_once __DIR__ . '/models/IssueModel.php';
-require_once __DIR__ . '/controllers/IssueController.php';
 require_once __DIR__ . '/models/NotificationModel.php';
 require_once __DIR__ . '/controllers/NotificationController.php';
 require_once __DIR__ . '/controllers/AuthController.php';
@@ -32,7 +30,6 @@ try {
     $userCtrl = new UserController();
     $projectCtrl = new ProjectController();
     $taskCtrl = new TaskController();
-    $issueCtrl = new IssueController();
     $notificationCtrl = new NotificationController();
 
     $action = $_GET['action'] ?? 'auth.me';
@@ -87,17 +84,6 @@ try {
             }
             break;
 
-        case 'issue':
-            switch ($method) {
-                case 'index': $issueCtrl->index(); break;
-                case 'get': $issueCtrl->get($id); break;
-                case 'create': $issueCtrl->create(); break;
-                case 'update': $issueCtrl->update($id); break;
-                case 'delete': $issueCtrl->delete($id); break;
-                case 'byProject': $issueCtrl->byProject($id); break;
-                default: throw new Exception("Неизвестный метод: issue.$method", 404);
-            }
-            break;
 
         case 'notification':
             switch ($method) {

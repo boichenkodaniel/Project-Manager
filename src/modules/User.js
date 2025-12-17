@@ -50,7 +50,7 @@ class User {
       if (['Администратор'].includes(user.role)) {
         type = 'admin';
         role = 'admin';
-      } else if (user.role === 'Руководитель проектов') {
+      } else if (user.role === 'Руководитель') {
         type = 'manager';
         role = 'manager';
       } else if (['Исполнитель'].includes(user.role)) {
@@ -77,7 +77,7 @@ class User {
         role,  // <- стандартное значение для формы
         created,
         type,
-        login:user.login
+        login: user.login
       };
     });
   }
@@ -164,7 +164,7 @@ class User {
       { element: employeeContainer, type: 'Employee' },
       { element: clientContainer, type: 'Client' }
     ];
-    
+
     containers.forEach(({ element, type }) => {
       if (element && element.children.length === 0) {
         element.innerHTML = `<li class="no-users">No ${type} users found</li>`;
@@ -194,9 +194,11 @@ class User {
 document.addEventListener('click', (e) => {
   const actionBtn = e.target.closest('[data-action]');
   if (!actionBtn) return;
-  console.log()
+  
   const action = actionBtn.dataset.action;
   const userItem = actionBtn.closest('.user-item');
+  if (!userItem) return;
+  
   const userId = userItem.dataset.id;
 
 

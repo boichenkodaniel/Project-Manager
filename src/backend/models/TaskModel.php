@@ -34,7 +34,15 @@ public function getAllTasks() {
     ';
 
     $stmt = $this->pdo->query($sql);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Убеждаемся, что TaskBy и TaskTo всегда присутствуют (даже если null)
+    foreach ($tasks as &$task) {
+        $task['TaskBy'] = $task['TaskBy'] ?? null;
+        $task['TaskTo'] = $task['TaskTo'] ?? null;
+    }
+    
+    return $tasks;
 }
 
 
@@ -133,14 +141,34 @@ public function getAllTasks() {
     // Получить задачи по проекту
     public function getTasksByProject($projectID) {
         $stmt = $this->pdo->prepare('
-            SELECT t.ID, t.Title, t.Description, t.Status, t.StartDate, t.EndDate, u.fullname AS executor_fullname
+            SELECT 
+                t.ID, 
+                t.Title, 
+                t.Description, 
+                t.Status, 
+                t.StartDate, 
+                t.EndDate, 
+                t.ProjectID,
+                t.TaskTo,
+                t.TaskBy,
+                u.fullname AS executor_fullname,
+                u_creator.fullname AS creator_fullname
             FROM "task" t
             LEFT JOIN "User" u ON u.ID = t.TaskTo
+            LEFT JOIN "User" u_creator ON u_creator.ID = t.TaskBy
             WHERE t.ProjectID = :projectID
             ORDER BY t.Status, t.EndDate ASC
         ');
         $stmt->execute(['projectID' => $projectID]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Убеждаемся, что TaskBy и TaskTo всегда присутствуют
+        foreach ($tasks as &$task) {
+            $task['TaskBy'] = $task['TaskBy'] ?? null;
+            $task['TaskTo'] = $task['TaskTo'] ?? null;
+        }
+        
+        return $tasks;
     }
 
     // Получить задачи по исполнителю

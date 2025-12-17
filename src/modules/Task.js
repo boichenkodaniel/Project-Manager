@@ -70,20 +70,26 @@ class Task {
 
 
     mapTasksToView(tasks) {
-        return tasks.map(task => ({
-            id: task.ID || task.id,
-            name: task.Title || task.title || '—',
-            description: task.Description || task.description || '—',
-            byWorker: task.creator_fullname || task.creator_fullname || '—',
-            byWorkerId: task.TaskBy || task.TaskByID || '',       
-            toWorker: task.executor_fullname || task.executor_fullname || '—',
-            toWorkerId: task.TaskTo || task.TaskToID || '',     
-            projectId: task.ProjectID || task.projectid,
-            projectTitle: task.project_title || '—',
-            status: task.Status || task.status || 'К выполнению',
-            startDate: task.StartDate || task.startdate || null,
-            endDate: task.EndDate || task.enddate || null
-        }));
+        return tasks.map(task => {
+            // Извлекаем ID, обрабатывая случаи когда они могут быть null
+            const byWorkerId = task.TaskBy || task.TaskByID || task.taskby || null;
+            const toWorkerId = task.TaskTo || task.TaskToID || task.taskto || null;
+            
+            return {
+                id: task.ID || task.id,
+                name: task.Title || task.title || '—',
+                description: task.Description || task.description || '—',
+                byWorker: task.creator_fullname || task.creator_fullname || '—',
+                byWorkerId: byWorkerId ? String(byWorkerId) : '',       
+                toWorker: task.executor_fullname || task.executor_fullname || '—',
+                toWorkerId: toWorkerId ? String(toWorkerId) : '',     
+                projectId: task.ProjectID || task.projectid,
+                projectTitle: task.project_title || '—',
+                status: task.Status || task.status || 'К выполнению',
+                startDate: task.StartDate || task.startdate || null,
+                endDate: task.EndDate || task.enddate || null
+            };
+        });
     }
 
 
@@ -112,11 +118,17 @@ class Task {
         const fragment = document.importNode(template.content, true);
         const li = fragment.querySelector('.activity-item');
 
+        // Обрабатываем ID, преобразуя в строки
+        const byWorkerId = task.byWorkerId ? String(task.byWorkerId) : '';
+        const toWorkerId = task.toWorkerId ? String(task.toWorkerId) : '';
+        const projectId = task.projectId ? String(task.projectId) : '';
+
         li.dataset.id = task.id;
         li.dataset.type = 'task';
-        li.dataset.taskBy = task.byWorkerId ?? '';
-        li.dataset.taskTo = task.toWorkerId ?? '';
-        li.dataset.projectId = task.projectId ?? '';
+        // Сохраняем ID в dataset для быстрого доступа
+        li.dataset.taskBy = byWorkerId;
+        li.dataset.taskTo = toWorkerId;
+        li.dataset.projectId = projectId;
 
         fragment.querySelector(this.root.dataName).textContent = task.name;
         fragment.querySelector(this.root.dataDescription).textContent = task.description;
@@ -126,10 +138,38 @@ class Task {
         // === Добавляем скрытые поля для редактирования ===
         const projectEl = fragment.querySelector('[data-task-project]');
         if (projectEl) {
-            projectEl.dataset.projectId = task.projectId ?? '';
-            projectEl.dataset.taskTo = task.toWorkerId ?? '';
-            projectEl.dataset.taskBy = task.byWorkerId ?? '';
+            projectEl.dataset.projectId = projectId;
         }
+        
+        // Находим или создаем скрытые элементы для taskBy и taskTo
+        let taskByEl = fragment.querySelector('[data-task-by]');
+        if (!taskByEl) {
+            taskByEl = document.createElement('span');
+            taskByEl.setAttribute('data-task-by', '');
+            taskByEl.style.display = 'none';
+            li.appendChild(taskByEl);
+        }
+        // Сохраняем ID в dataset.userId для совместимости с getEntityData
+        taskByEl.dataset.userId = byWorkerId;
+        
+        let taskToEl = fragment.querySelector('[data-task-to]');
+        if (!taskToEl) {
+            taskToEl = document.createElement('span');
+            taskToEl.setAttribute('data-task-to', '');
+            taskToEl.style.display = 'none';
+            li.appendChild(taskToEl);
+        }
+        // Сохраняем ID в dataset.userId для совместимости с getEntityData
+        taskToEl.dataset.userId = toWorkerId;
+        
+        console.log('Task data saved to DOM:', {
+            id: task.id,
+            byWorkerId,
+            toWorkerId,
+            projectId,
+            taskByElUserId: taskByEl.dataset.userId,
+            taskToElUserId: taskToEl.dataset.userId
+        });
 
         const statusEl = fragment.querySelector('[data-task-status]');
         if (statusEl) statusEl.textContent = task.status ?? 'К выполнению';

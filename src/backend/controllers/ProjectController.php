@@ -38,6 +38,11 @@ class ProjectController {
                     $projects = array_filter($projects, function($p) use ($projectIds) {
                         return in_array($p['id'], $projectIds);
                     });
+                } elseif ($_SESSION['user_role'] === 'Руководитель') {
+                    // Руководитель видит только проекты, которые он создал
+                    $projects = array_filter($projects, function($p) {
+                        return isset($p['managerid']) && $p['managerid'] == $_SESSION['user_id'];
+                    });
                 }
                 // Администратор и Руководитель проектов видят все проекты
             }
@@ -68,8 +73,8 @@ class ProjectController {
 
     // POST ?action=projects.create
     public function create() {
-        // Только руководитель проектов и админ могут создавать проекты
-        AuthMiddleware::requireRole(['Руководитель проектов', 'Администратор']);
+        // Только руководитель проектов, руководитель и админ могут создавать проекты
+        AuthMiddleware::requireRole(['Руководитель проектов', 'Руководитель', 'Администратор']);
         
         $input = json_decode(file_get_contents('php://input'), true);
         if (!$input) {
@@ -116,6 +121,9 @@ class ProjectController {
 
     // POST ?action=projects.update&id=1
     public function update($id) {
+        // Только руководитель проектов, руководитель и админ могут обновлять проекты
+        AuthMiddleware::requireRole(['Руководитель проектов', 'Руководитель', 'Администратор']);
+        
         if (!$id || !is_numeric($id)) {
             $this->json(['success' => false, 'error' => 'Некорректный ID проекта'], 400);
         }
@@ -152,6 +160,9 @@ class ProjectController {
 
     // GET ?action=projects.delete&id=1
     public function delete($id) {
+        // Только руководитель проектов, руководитель и админ могут удалять проекты
+        AuthMiddleware::requireRole(['Руководитель проектов', 'Руководитель', 'Администратор']);
+        
         if (!$id || !is_numeric($id)) {
             $this->json(['success' => false, 'error' => 'Некорректный ID проекта'], 400);
         }

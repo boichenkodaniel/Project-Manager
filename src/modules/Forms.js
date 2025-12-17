@@ -13,7 +13,7 @@ function initModalElements() {
   tabs = document.querySelectorAll('.tab');
   forms = document.querySelectorAll('.form');
   modalTitle = document.querySelector('[data-modal-title]');
-  
+
   if (!modal) {
     console.error('Modal element not found!');
     return false;
@@ -30,7 +30,7 @@ function switchTab(type) {
   if (!tabs || !forms || !modalTitle) {
     if (!initModalElements()) return;
   }
-  
+
   tabs.forEach(tab => {
     tab.classList.toggle('tab--active', tab.dataset.tab === type)
   })
@@ -48,7 +48,7 @@ async function openModal({ type, mode = 'create', data = null }) {
     console.error('Cannot open modal: modal element not found');
     return;
   }
-  
+
   modalMode = mode
   currentEntity = type
   currentId = data?.id ?? null
@@ -67,24 +67,45 @@ async function openModal({ type, mode = 'create', data = null }) {
     if (type === 'task') {
       await loadUsersAndProjects();
       const form = document.querySelector(`.form[data-form="task"]`);
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+      // Фильтруем только исполнителей для Assigned to
+      const employees = users.filter(user => {
+        const role = user.role || '';
+        return role === 'Исполнитель' || role === 'employee' || role.toLowerCase() === 'исполнитель';
+      });
+
+      // Фильтруем только руководителей для Assigned by
+      const managers = users.filter(user => {
+        const role = user.role || '';
+        return role === 'Руководитель' || role === 'manager' ||
+          role.toLowerCase() === 'руководитель' ||
+          role === 'Администратор' || role === 'admin';
+      });
+
       populateSelect(form.querySelector('[name="taskProject"]'), projects, 'id', 'title');
-      populateSelect(form.querySelector('[name="taskBy"]'), users, 'id', 'fullname');
-      populateSelect(form.querySelector('[name="taskTo"]'), users, 'id', 'fullname');
+
+      // Автоматически подставляем текущего пользователя в TaskBy и блокируем поле
+      const taskBySelect = form.querySelector('[name="taskBy"]');
+      populateSelect(taskBySelect, managers, 'id', 'fullname', currentUser.id);
+      taskBySelect.disabled = true; // Блокируем при создании
+
+      populateSelect(form.querySelector('[name="taskTo"]'), employees, 'id', 'fullname');
     }
     if (type === 'project') {
       await loadUsersAndProjects();
 
       const form = document.querySelector('.form[data-form="project"]');
-      
+
       console.log('Loaded users for project:', users);
-      
+
       // Фильтруем только клиентов для селекта клиентов проекта
       const clients = users.filter(user => {
         const role = user.role || '';
-        const isClient = role === 'Клиент' || 
-                        role === 'client' || 
-                        role.toLowerCase() === 'клиент' ||
-                        role.toLowerCase() === 'client';
+        const isClient = role === 'Клиент' ||
+          role === 'client' ||
+          role.toLowerCase() === 'клиент' ||
+          role.toLowerCase() === 'client';
         console.log(`User ${user.fullname || user.id}: role="${role}", isClient=${isClient}`);
         return isClient;
       });
@@ -118,7 +139,7 @@ async function openModal({ type, mode = 'create', data = null }) {
 
 function updateModalTitle(type, mode) {
   if (!modalTitle && !initModalElements()) return;
-  
+
   const titles = {
     task: { create: 'Add Task', edit: 'Edit Task' },
     user: { create: 'Add User', edit: 'Edit User' },
@@ -147,32 +168,50 @@ async function fillForm(type, data) {
   if (!form || !data) return;
 
   if (type === 'task') {
-    // Фильтруем пользователей для назначения задач (исполнители и руководители)
-    const assignableUsers = users.filter(user => 
-      user.role === 'employee' || 
-      user.role === 'manager' ||
-      user.role === 'admin'
-    );
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const isAdmin = currentUser.role === 'Администратор' || currentUser.role === 'admin';
+
+    // Фильтруем только исполнителей для Assigned to
+    const employees = users.filter(user => {
+      const role = user.role || '';
+      return role === 'Исполнитель' || role === 'employee' || role.toLowerCase() === 'исполнитель';
+    });
+
+    // Фильтруем только руководителей для Assigned by
+    const managers = users.filter(user => {
+      const role = user.role || '';
+      return role === 'Руководитель' || role === 'manager' ||
+        role.toLowerCase() === 'Руководитель' ||
+        role === 'Администратор' || role === 'admin';
+    });
 
     // Наполняем select и сразу выставляем выбранное значение
     populateSelect(form.querySelector('[name="taskProject"]'), projects, 'id', 'title', data.taskProject);
-    populateSelect(form.querySelector('[name="taskBy"]'), assignableUsers, 'id', 'fullname', data.taskBy);
-    populateSelect(form.querySelector('[name="taskTo"]'), assignableUsers, 'id', 'fullname', data.taskTo);
+
+    const taskBySelect = form.querySelector('[name="taskBy"]');
+    populateSelect(taskBySelect, managers, 'id', 'fullname', data.taskBy);
+
+    // Блокируем TaskBy при редактировании для всех кроме администратора
+    if (modalMode === 'edit' && !isAdmin) {
+      taskBySelect.disabled = true;
+    }
+
+    populateSelect(form.querySelector('[name="taskTo"]'), employees, 'id', 'fullname', data.taskTo);
   }
   if (type === 'project') {
     // Фильтруем только клиентов для селекта клиентов проекта
     const clients = users.filter(user => {
       const role = user.role || '';
-      const isClient = role === 'Клиент' || 
-                      role === 'client' || 
-                      role.toLowerCase() === 'клиент' ||
-                      role.toLowerCase() === 'client';
+      const isClient = role === 'Клиент' ||
+        role === 'client' ||
+        role.toLowerCase() === 'клиент' ||
+        role.toLowerCase() === 'client';
       console.log(`[fillForm] User ${user.fullname || user.id}: role="${role}", isClient=${isClient}`);
       return isClient;
     });
-    
+
     console.log('[fillForm] Filtered clients for edit:', clients);
-    
+
     populateSelect(
       form.querySelector('[name="projectClient"]'),
       clients,
@@ -210,18 +249,18 @@ async function fetchUsers(filterRole = null) {
   if (filterRole) {
     url += `&role=${filterRole}`;
   }
-  
+
   console.log('Fetching users from:', url);
-  
+
   const res = await fetch(url);
-  
+
   if (!res.ok) {
     console.error('HTTP error:', res.status, res.statusText);
     const errorText = await res.text();
     console.error('Error response:', errorText);
     throw new Error(`HTTP ${res.status}: ${res.statusText}`);
   }
-  
+
   const result = await res.json();
   console.log('Users API response:', result);
 
@@ -249,13 +288,13 @@ async function fetchProjects() {
 async function loadUsersAndProjects() {
   try {
     console.log('Loading users and projects...');
-    
+
     // Загружаем всех пользователей (для админов и руководителей) или только нужных ролей
     try {
       users = await fetchUsers();
       console.log('Fetched users:', users);
       console.log('Users count:', users.length);
-      
+
       // Выводим роли всех пользователей для отладки
       if (users.length > 0) {
         console.log('User roles:', users.map(u => ({ id: u.id, name: u.fullname, role: u.role })));
@@ -302,7 +341,7 @@ function closeModal() {
 
 function initFormTabs() {
   if (!tabs && !initModalElements()) return;
-  
+
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
       switchTab(tab.dataset.tab)
@@ -312,7 +351,7 @@ function initFormTabs() {
 
 function initFormSubmit() {
   if (!forms && !initModalElements()) return;
-  
+
   forms.forEach(form => {
     form.addEventListener('submit', e => {
       e.preventDefault();
@@ -341,10 +380,10 @@ function initFormSubmit() {
 
 function mapRoleForDB(role) {
   switch (role) {
-    case 'admin': return 'admin';
-    case 'manager': return 'manager';
-    case 'employee': return 'employee';
-    case 'client': return 'client';
+    case 'admin': return 'Администратор';
+    case 'manager': return 'Руководитель';
+    case 'employee': return 'Исполнитель';
+    case 'client': return 'Клиент';
     default: return role;
   }
 }
@@ -413,11 +452,16 @@ function addUserToDOM(user) {
   if (createdEl) createdEl.textContent = 'Created: ' + new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' });
 
   // Выбираем контейнер в зависимости от роли
-  const containerSelector = {
-    'Администратор': '[data-admin-container]',
-    'Исполнитель': '[data-employee-container]',
-    'Клиент': '[data-client-container]'
-  }[user.role] || '[data-employee-container]';
+  let containerSelector = '[data-employee-container]';
+  if (user.role === 'Администратор' || user.role === 'admin') {
+    containerSelector = '[data-admin-container]';
+  } else if (user.role === 'Руководитель' || user.role === 'manager') {
+    containerSelector = '[data-manager-container]';
+  } else if (user.role === 'Исполнитель' || user.role === 'employee') {
+    containerSelector = '[data-employee-container]';
+  } else if (user.role === 'Клиент' || user.role === 'client') {
+    containerSelector = '[data-client-container]';
+  }
 
   const container = document.querySelector(containerSelector);
   if (container) container.appendChild(fragment);
@@ -431,7 +475,7 @@ async function updateUser(id, data) {
       email: data.userEmail,
       role: mapRoleForDB(data.userRole)
     };
-    
+
     // Добавляем login и password только если они указаны
     if (data.userLogin) {
       body.login = data.userLogin;
@@ -518,14 +562,14 @@ function updateEntity(type, id, data) {
 }
 
 async function createTask(data) {
-
-
   try {
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
     const body = {
       Title: data.taskName,
       Description: data.taskDescription,
       ProjectID: data.taskProject,
-      TaskBy: data.taskBy,    // добавлено
+      TaskBy: data.taskBy || currentUser.id,    // Используем текущего пользователя, если не указан
       ExecutorID: data.taskTo,
       Status: mapTaskStatusForDB(data.taskStatus),
       StartDate: data.taskStartDate,
@@ -558,11 +602,11 @@ async function createTask(data) {
 
 function mapTaskStatusForDB(status) {
   switch (status) {
-    case 'pending': return 'pending';
-    case 'in-progress': return 'in-progress';
-    case 'on-review': return 'on-review';
-    case 'completed': return 'completed';
-    default: return 'pending';
+    case 'pending': return 'К выполнению';
+    case 'in-progress': return 'В работе';
+    case 'on-review': return 'На проверке';
+    case 'completed': return 'Выполнена';
+    default: return 'К выполнению';
   }
 }
 
@@ -839,11 +883,28 @@ function addProjectToDOM(project) {
     project.client_fullname || '—';
 
   // ===== скрытые данные =====
-  item.querySelector('[data-project-client]').dataset.userId = project.clientid ?? '';
-  item.querySelector('[data-project-status]').textContent = project.status ?? '';
+  const clientEl = item.querySelector('[data-project-client]');
+  if (clientEl) {
+    clientEl.dataset.userId = project.clientid ?? '';
+  }
+  const assignedEl = item.querySelector('[data-project-assigned]');
+  if (assignedEl) {
+    assignedEl.dataset.userId = project.clientid ?? '';
+  }
+  const statusEl = item.querySelector('[data-project-status]');
+  if (statusEl) {
+    statusEl.textContent = project.status ?? '';
+  }
 
-  item.querySelector('[data-project-date]').value =
-    project.plannedenddate ? project.plannedenddate.split('T')[0] : '';
+  // Сохраняем даты в скрытых полях для редактирования
+  const startDateEl = item.querySelector('[data-project-start-date]');
+  if (startDateEl) {
+    startDateEl.value = project.startdate ? project.startdate.split('T')[0] : '';
+  }
+  const endDateEl = item.querySelector('[data-project-end-date]');
+  if (endDateEl) {
+    endDateEl.value = project.plannedenddate ? project.plannedenddate.split('T')[0] : '';
+  }
 
   container.appendChild(fragment);
 }
@@ -920,7 +981,7 @@ function initModalButtons() {
     // Клонируем элемент, чтобы удалить все обработчики
     const newBtn = btn.cloneNode(true);
     btn.parentNode.replaceChild(newBtn, btn);
-    
+
     newBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -940,7 +1001,7 @@ function initModalButtons() {
       closeModal();
     });
   });
-  
+
   console.log('Modal buttons initialized. Found', document.querySelectorAll('[data-open]').length, 'buttons');
 }
 
@@ -971,10 +1032,10 @@ function populateSelect(selectEl, items, valueKey, textKey, selectedValue = '') 
     console.error('Select element not found for populateSelect');
     return;
   }
-  
+
   console.log(`Populating select with ${items ? items.length : 0} items, valueKey=${valueKey}, textKey=${textKey}`);
   console.log('Items to populate:', items);
-  
+
   selectEl.innerHTML = ''; // очистим старые опции
   const defaultOption = document.createElement('option');
   defaultOption.value = '';
@@ -995,17 +1056,17 @@ function populateSelect(selectEl, items, valueKey, textKey, selectedValue = '') 
   items.forEach(item => {
     const value = item[valueKey];
     const text = item[textKey];
-    
+
     if (value === null || value === undefined) {
       console.warn('Skipping item with null/undefined value:', item);
       return;
     }
-    
+
     if (!text) {
       console.warn('Skipping item with empty text:', item);
       return;
     }
-    
+
     const option = document.createElement('option');
     option.value = value;
     option.textContent = text;
@@ -1015,7 +1076,7 @@ function populateSelect(selectEl, items, valueKey, textKey, selectedValue = '') 
     selectEl.appendChild(option);
     addedCount++;
   });
-  
+
   console.log(`Select populated: ${addedCount} options added`);
 
 }
@@ -1033,7 +1094,7 @@ export function initCreateForm() {
     }, 100);
     return;
   }
-  
+
   initModalButtons();
   initFormTabs();
   initFormSubmit();
@@ -1085,8 +1146,13 @@ document.addEventListener('click', e => {
   }
 })
 
-function handleEdit(type, id) {
-  const data = getEntityData(type, id);
+async function handleEdit(type, id) {
+  let data;
+  if (type === 'project') {
+    data = await getEntityData(type, id);
+  } else {
+    data = getEntityData(type, id);
+  }
   console.log('Data from DOM before fillForm:', data);
   const form = document.querySelector(`.form[data-form="${type}"]`);
 
@@ -1125,19 +1191,40 @@ function getEntityData(type, id) {
 
   if (type === 'task') {
     const item = document.querySelector(`.activity-item[data-id="${id}"]`);
+    if (!item) {
+      console.error('Task item not found for id:', id);
+      return null;
+    }
+
     const statusText = item.querySelector('[data-task-status]')?.textContent || '';
     const statusValue = mapTaskStatusFromDB(statusText);
+
+    // Получаем ID из dataset элемента или из скрытых полей
+    // Приоритет: скрытые элементы [data-task-by], затем dataset.taskBy
+    const taskByEl = item.querySelector('[data-task-by]');
+    const taskBy = (taskByEl?.dataset.userId) || item.dataset.taskBy || '';
+    
+    const taskToEl = item.querySelector('[data-task-to]');
+    const taskTo = (taskToEl?.dataset.userId) || item.dataset.taskTo || '';
+    
+    const taskProjectEl = item.querySelector('[data-task-project]');
+    const taskProject = (taskProjectEl?.dataset.projectId) || item.dataset.projectId || '';
+    
+    console.log('Extracted task data:', { taskBy, taskTo, taskProject, 
+      taskByFromEl: taskByEl?.dataset.userId, 
+      taskByFromDataset: item.dataset.taskBy,
+      taskToFromEl: taskToEl?.dataset.userId,
+      taskToFromDataset: item.dataset.taskTo
+    });
 
     return {
       id,
       taskName: item.querySelector('[data-task-name]')?.textContent || '',
       taskDescription: item.querySelector('[data-task-description]')?.textContent || '',
       taskStatus: statusValue,
-
-      taskBy: item.querySelector('[data-task-by]')?.dataset.userId || '',
-      taskTo: item.querySelector('[data-task-to]')?.dataset.userId || '',
-      taskProject: item.querySelector('[data-task-project]')?.dataset.projectId || '',
-
+      taskBy: taskBy,
+      taskTo: taskTo,
+      taskProject: taskProject,
       taskStartDate: item.querySelector('[data-task-start-date]')?.value || '',
       taskEndDate: item.querySelector('[data-task-end-date]')?.value || ''
     };
@@ -1148,15 +1235,45 @@ function getEntityData(type, id) {
   if (type === 'project') {
     const el = document.querySelector(`.project__item[data-id="${id}"]`);
 
-    return {
-      id,
-      projectName: el.querySelector('[data-project-name]')?.textContent || '',
-      projectDescription: el.querySelector('[data-project-description]')?.textContent || '',
-      projectClient: el.querySelector('[data-project-client]')?.dataset.userId || '',
-      projectStatus: el.querySelector('[data-project-status]')?.textContent || '',
-      projectStartDate: el.querySelector('[data-project-start-date]')?.value || '',
-      projectEndDate: el.querySelector('[data-project-end-date]')?.value || ''
-    };
+    // Получаем данные проекта из API для точности
+    return fetch(`/api?action=projects.get&id=${id}`)
+      .then(res => res.json())
+      .then(result => {
+        if (result.success && result.data) {
+          const project = result.data;
+          return {
+            id,
+            projectName: project.title || '',
+            projectDescription: project.detaileddescription || '',
+            projectClient: project.clientid || '',
+            projectStatus: project.status || '',
+            projectStartDate: project.startdate ? project.startdate.split('T')[0] : '',
+            projectEndDate: project.plannedenddate ? project.plannedenddate.split('T')[0] : ''
+          };
+        }
+        // Fallback на DOM данные
+        return {
+          id,
+          projectName: el.querySelector('[data-project-name]')?.textContent || '',
+          projectDescription: el.querySelector('[data-project-description]')?.textContent || '',
+          projectClient: el.querySelector('[data-project-client]')?.dataset.userId || el.querySelector('[data-project-assigned]')?.dataset.userId || '',
+          projectStatus: el.querySelector('[data-project-status]')?.textContent || '',
+          projectStartDate: el.querySelector('[data-project-start-date]')?.value || '',
+          projectEndDate: el.querySelector('[data-project-end-date]')?.value || ''
+        };
+      })
+      .catch(() => {
+        // Fallback на DOM данные при ошибке
+        return {
+          id,
+          projectName: el.querySelector('[data-project-name]')?.textContent || '',
+          projectDescription: el.querySelector('[data-project-description]')?.textContent || '',
+          projectClient: el.querySelector('[data-project-client]')?.dataset.userId || el.querySelector('[data-project-assigned]')?.dataset.userId || '',
+          projectStatus: el.querySelector('[data-project-status]')?.textContent || '',
+          projectStartDate: '',
+          projectEndDate: ''
+        };
+      });
   }
 
 }
@@ -1191,17 +1308,4 @@ function handleDelete(type, id) {
 //     if (type === 'project') deleteProject(id);
 //   }
 // });
-document.addEventListener('click', e => {
-  const btn = e.target.closest('[data-action="delete"]');
-  if (!btn) return;
-
-  const item = btn.closest('.activity-item');
-  if (!item) return;
-
-  const id = item.dataset.id;
-  const type = item.dataset.type;
-
-  if (type === 'task') {
-    deleteTask(id);
-  }
-});
+// Удален дублирующий обработчик удаления задач - используется общий handleDelete

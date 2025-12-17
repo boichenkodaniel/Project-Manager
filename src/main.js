@@ -1,11 +1,10 @@
 import './style.css';
 
 import Auth from './modules/Auth';
-import ChartModule from './modules/ChartModule';
 import Task from "./modules/Task";
-import Issue from "./modules/Issue";
 import Project from "./modules/Project";
 import User from "./modules/User";
+import Dashboard from "./modules/Dashboard";
 import { initCreateForm } from './modules/Forms.js'
 
 // Инициализация авторизации
@@ -13,7 +12,6 @@ const auth = new Auth();
 
 
 let taskModuleInstance = null;
-let issueModuleInstance = null;
 let projectModuleInstance = null;
 let userModuleInstance = null;
 
@@ -37,25 +35,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         userModuleInstance = new User(); // для инициализации users, проектов и задач
         projectModuleInstance = new Project();
         taskModuleInstance = new Task();
-        issueModuleInstance = new Issue();
-
-        taskModuleInstance.loadRecentCompletedTasks();
-        issueModuleInstance.loadTopIssues();
-        new ChartModule();
+        new Dashboard(); // Загружаем Dashboard с проектами и задачами
         break;
       case 'tasks.html':
         taskModuleInstance = new Task();
         taskModuleInstance.loadAndRender(); // Загружаем все задачи на странице задач
         // Для остальных модулей - только инициализация без рендера, если не нужны на этой странице
-        issueModuleInstance = new Issue();
-        projectModuleInstance = new Project();
-        userModuleInstance = new User();
-        break;
-      case 'issues.html':
-        issueModuleInstance = new Issue();
-        issueModuleInstance.loadAndRender(); // Загружаем все issues на странице Issues
-        // Для остальных модулей - только инициализация без рендера, если не нужны на этой странице
-        taskModuleInstance = new Task();
         projectModuleInstance = new Project();
         userModuleInstance = new User();
         break;
@@ -64,7 +49,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         userModuleInstance.loadAndRender(); // Загружаем всех пользователей на странице пользователей
         // Для остальных модулей - только инициализация без рендера, если не нужны на этой странице
         taskModuleInstance = new Task();
-        issueModuleInstance = new Issue();
         projectModuleInstance = new Project();
         break;
       case 'projects.html':
@@ -72,17 +56,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         projectModuleInstance.loadAndRender(); // Загружаем все проекты на странице проектов
         // Для остальных модулей - только инициализация без рендера, если не нужны на этой странице
         taskModuleInstance = new Task();
-        issueModuleInstance = new Issue();
         userModuleInstance = new User();
         break;
       default:
         console.warn('Неизвестная страница:', currentPage);
         // Тем не менее инициализируем все модули на всякий случай
         taskModuleInstance = new Task();
-        issueModuleInstance = new Issue();
         projectModuleInstance = new Project();
         userModuleInstance = new User();
-        new ChartModule();
     }
     
     // Добавляем кнопку выхода
@@ -117,7 +98,7 @@ function addLogoutButton() {
     const logoutBtn = document.createElement('button');
     logoutBtn.className = 'logout-button';
     logoutBtn.textContent = 'Выйти';
-    logoutBtn.style.cssText = 'margin-top: 1rem; padding: 0.5rem 1rem; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer;';
+    logoutBtn.style.cssText = 'padding: 0.5rem 1rem; background: #921b4dff; color: white; border: none; border-radius: 5px; cursor: pointer;';
     logoutBtn.addEventListener('click', () => auth.logout());
     profile.appendChild(logoutBtn);
   }
