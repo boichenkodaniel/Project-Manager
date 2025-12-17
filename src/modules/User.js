@@ -41,7 +41,7 @@ class User {
     return result.data || [];
   }
 
-  // Преобразование из БД → view-модель (type: admin/employee/client)
+  // Преобразование из БД → view-модель (type: admin/manager/employee/client)
   mapUsersToView(users) {
     return users.map(user => {
       let type = 'employee'; // по умолчанию
@@ -50,7 +50,10 @@ class User {
       if (['Администратор'].includes(user.role)) {
         type = 'admin';
         role = 'admin';
-      } else if (['Руководитель', 'Исполнитель'].includes(user.role)) {
+      } else if (user.role === 'Руководитель проектов') {
+        type = 'manager';
+        role = 'manager';
+      } else if (['Исполнитель'].includes(user.role)) {
         type = 'employee';
         role = 'employee';
       } else if (user.role === 'Клиент') {
@@ -81,17 +84,19 @@ class User {
 
   render() {
     const adminContainer = document.querySelector(this.root.dataAdminContainer);
+    const managerContainer = document.querySelector('[data-manager-container]');
     const employeeContainer = document.querySelector(this.root.dataEmployeeContainer);
     const clientContainer = document.querySelector(this.root.dataClientContainer);
     const template = document.querySelector(this.root.dataTemplate);
 
-    if (!adminContainer || !employeeContainer || !clientContainer || !template) {
+    if (!adminContainer || !managerContainer || !employeeContainer || !clientContainer || !template) {
       console.warn('Один или несколько элементов не найдены');
       return;
     }
 
     // Очищаем
     adminContainer.innerHTML = '';
+    managerContainer.innerHTML = '';
     employeeContainer.innerHTML = '';
     clientContainer.innerHTML = '';
 
@@ -101,6 +106,9 @@ class User {
       switch (user.type) {
         case 'admin':
           adminContainer.appendChild(userElement);
+          break;
+        case 'manager':
+          managerContainer.appendChild(userElement);
           break;
         case 'employee':
           employeeContainer.appendChild(userElement);
@@ -113,7 +121,7 @@ class User {
       }
     });
 
-    this.checkEmptyContainers(adminContainer, employeeContainer, clientContainer);
+    this.checkEmptyContainers(adminContainer, managerContainer, employeeContainer, clientContainer);
 
 
   }
@@ -149,10 +157,17 @@ class User {
 
 
 
-  checkEmptyContainers(...containers) {
-    containers.forEach(container => {
-      if (container.children.length === 0) {
-        container.innerHTML = `<li class="no-users">No ${container.dataset?.containerType || 'users'} found</li>`;
+  checkEmptyContainers(adminContainer, managerContainer, employeeContainer, clientContainer) {
+    const containers = [
+      { element: adminContainer, type: 'Admin' },
+      { element: managerContainer, type: 'Manager' },
+      { element: employeeContainer, type: 'Employee' },
+      { element: clientContainer, type: 'Client' }
+    ];
+    
+    containers.forEach(({ element, type }) => {
+      if (element && element.children.length === 0) {
+        element.innerHTML = `<li class="no-users">No ${type} users found</li>`;
       }
     });
   }
@@ -161,6 +176,7 @@ class User {
   showError(message) {
     const containers = [
       document.querySelector(this.root.dataAdminContainer),
+      document.querySelector('[data-manager-container]'),
       document.querySelector(this.root.dataEmployeeContainer),
       document.querySelector(this.root.dataClientContainer)
     ].filter(Boolean);

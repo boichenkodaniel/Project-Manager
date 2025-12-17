@@ -113,4 +113,27 @@ class ReportController {
             $this->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
+
+    // НОВЫЙ: Получить статистику по задачам для графика
+    public function getTasksStats() {
+        AuthMiddleware::requireAuth(); // Только авторизованные пользователи
+        try {
+            $period = $_GET['period'] ?? 'week'; // По умолчанию за неделю
+            $stats = $this->model->getTasksStats($period);
+            $this->json(['success' => true, 'data' => $stats]);
+        } catch (Exception $e) {
+            $this->json(['success' => false, 'error' => 'Ошибка получения статистики задач: ' . $e->getMessage()], 500);
+        }
+    }
+
+    // НОВЫЙ: Получить статистику по Issues для графика
+    public function getIssuesStats() {
+        AuthMiddleware::requireAuth(); // Только авторизованные пользователи
+        try {
+            $stats = $this->model->getIssuesStats();
+            $this->json(['success' => true, 'data' => $stats]);
+        } catch (Exception $e) {
+            $this->json(['success' => false, 'error' => 'Ошибка получения статистики Issues: ' . $e->getMessage()], 500);
+        }
+    }
 }

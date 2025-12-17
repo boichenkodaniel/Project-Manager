@@ -109,6 +109,12 @@
                         </ul>
                     </div>
                     <hr />
+                    <div class="manager-users">
+                        <h2 class="users-type">Manager users</h2>
+                        <ul class="user-list" data-manager-container>
+                        </ul>
+                    </div>
+                    <hr />
                     <div class="employee-users">
                         <h2 class="users-type">Employee users</h2>
                         <ul class="user-list" data-employee-container>
@@ -229,12 +235,26 @@
                     <label for="userEmail">Email</label>
                     <input type="email" name="userEmail" id="userEmail" required>
 
+                    <label for="userLogin">Login</label>
+                    <input type="text" name="userLogin" id="userLogin" required>
+
+                    <label for="userPassword">Password</label>
+                    <input type="password" name="userPassword" id="userPassword" required>
+
                     <div class="role-picker">
                         <label class="role-option">
                             <input type="radio" name="userRole" value="employee" checked>
                             <span>
                                 <img src="./src/assets/icons/employee.svg" alt="" loading="lazy">
-                                Employee
+                                Исполнитель
+                            </span>
+                        </label>
+
+                        <label class="role-option">
+                            <input type="radio" name="userRole" value="manager">
+                            <span>
+                                <img src="./src/assets/icons/admin.svg" alt="" loading="lazy">
+                                Руководитель проектов
                             </span>
                         </label>
 
@@ -242,7 +262,7 @@
                             <input type="radio" name="userRole" value="client">
                             <span>
                                 <img src="./src/assets/icons/client.svg" alt="" loading="lazy">
-                                Client
+                                Клиент
                             </span>
                         </label>
 
@@ -250,7 +270,7 @@
                             <input type="radio" name="userRole" value="admin">
                             <span>
                                 <img src="./src/assets/icons/admin.svg" alt="" loading="lazy">
-                                Admin
+                                Администратор
                             </span>
                         </label>
                     </div>

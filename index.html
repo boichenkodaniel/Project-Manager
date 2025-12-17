@@ -237,15 +237,23 @@
                             <input type="radio" name="taskStatus" value="pending" checked>
                             <span>
                                 <img src="./src/assets/icons/pending.svg" alt="" loading="lazy">
-                                Pending
+                                К выполнению
                             </span>
                         </label>
 
                         <label class="status-option">
-                            <input type="radio" name="taskStatus" value="in-process">
+                            <input type="radio" name="taskStatus" value="in-progress">
                             <span>
                                 <img src="./src/assets/icons/in-progress.svg" alt="" loading="lazy">
-                                In Process
+                                В работе
+                            </span>
+                        </label>
+
+                        <label class="status-option">
+                            <input type="radio" name="taskStatus" value="on-review">
+                            <span>
+                                <img src="./src/assets/icons/in-progress.svg" alt="" loading="lazy">
+                                На проверке
                             </span>
                         </label>
 
@@ -253,7 +261,7 @@
                             <input type="radio" name="taskStatus" value="completed">
                             <span>
                                 <img src="./src/assets/icons/complete.svg" alt="" height="" loading="lazy">
-                                Completed
+                                Выполнена
                             </span>
                         </label>
                     </div>
@@ -271,12 +279,26 @@
                     <label for="userEmail">Email</label>
                     <input type="email" name="userEmail" id="userEmail" required>
 
+                    <label for="userLogin">Login</label>
+                    <input type="text" name="userLogin" id="userLogin" required>
+
+                    <label for="userPassword">Password</label>
+                    <input type="password" name="userPassword" id="userPassword" required>
+
                     <div class="role-picker">
                         <label class="role-option">
                             <input type="radio" name="userRole" value="employee" checked>
                             <span>
                                 <img src="./src/assets/icons/employee.svg" alt="" loading="lazy">
-                                Employee
+                                Исполнитель
+                            </span>
+                        </label>
+
+                        <label class="role-option">
+                            <input type="radio" name="userRole" value="manager">
+                            <span>
+                                <img src="./src/assets/icons/admin.svg" alt="" loading="lazy">
+                                Руководитель проектов
                             </span>
                         </label>
 
@@ -284,7 +306,7 @@
                             <input type="radio" name="userRole" value="client">
                             <span>
                                 <img src="./src/assets/icons/client.svg" alt="" loading="lazy">
-                                Client
+                                Клиент
                             </span>
                         </label>
 
@@ -292,7 +314,7 @@
                             <input type="radio" name="userRole" value="admin">
                             <span>
                                 <img src="./src/assets/icons/admin.svg" alt="" loading="lazy">
-                                Admin
+                                Администратор
                             </span>
                         </label>
                     </div>
@@ -313,9 +335,14 @@
                     <label for="projectClient">Client</label>
                     <select name="projectClient" id="projectClient">
                             <option value="">— Select user —</option>
-    <option value="1">John Smith</option>
-    <option value="2">Anna Brown</option>
-    <option value="3">Mike Johnson</option>
+                            <option value="1">John Smith</option>
+                            <option value="2">Anna Brown</option>
+                            <option value="3">Mike Johnson</option>
+                    </select>
+
+                    <label for="projectManager">Manager</label>
+                    <select name="projectManager" id="projectManager">
+                            <option value="">— Select manager —</option>
                     </select>
 
                     <div class="form-row">

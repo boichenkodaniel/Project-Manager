@@ -15,15 +15,18 @@ class ProjectModel {
     public function getAllProjects() {
         $sql = '
             SELECT 
-                id,
-                title,
-                detaileddescription,
-                startdate,
-                plannedenddate,
-                status,
-                clientid
-            FROM "project"
-            ORDER BY startdate DESC
+                p.id,
+                p.title,
+                p.detaileddescription,
+                p.startdate,
+                p.plannedenddate,
+                p.status,
+                p.clientid,
+                u.fullname as client_fullname,
+                u.email as client_email
+            FROM "project" p
+            LEFT JOIN "User" u ON p.clientid = u.id
+            ORDER BY p.startdate DESC
         ';
 
         $stmt = $this->pdo->query($sql);
@@ -34,15 +37,22 @@ class ProjectModel {
     public function getProjectById($id) {
         $sql = '
             SELECT 
-                id,
-                title,
-                detaileddescription,
-                startdate,
-                plannedenddate,
-                status,
-                clientid
-            FROM "project"
-            WHERE id = :id
+                p.id,
+                p.title,
+                p.detaileddescription,
+                p.startdate,
+                p.plannedenddate,
+                p.status,
+                p.clientid,
+                p.managerid,
+                u.fullname as client_fullname,
+                u.email as client_email,
+                m.fullname as manager_fullname,
+                m.email as manager_email
+            FROM "project" p
+            LEFT JOIN "User" u ON p.clientid = u.id
+            LEFT JOIN "User" m ON p.managerid = m.id
+            WHERE p.id = :id
         ';
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['id' => $id]);
@@ -50,7 +60,7 @@ class ProjectModel {
     }
 
     // Создать проект
-    public function createProject($title, $description, $startDate, $plannedEndDate, $status, $clientId) {
+    public function createProject($title, $description, $startDate, $plannedEndDate, $status, $clientId, $managerId) {
         if (!in_array($status, self::ALLOWED_STATUSES)) {
             throw new InvalidArgumentException("Недопустимый статус: $status");
         }
@@ -62,11 +72,18 @@ class ProjectModel {
             throw new InvalidArgumentException("Клиент с ID $clientId не найден");
         }
 
+        // Проверка существования менеджера
+        $managerExists = $this->pdo->prepare('SELECT 1 FROM "User" WHERE ID = :id');
+        $managerExists->execute(['id' => $managerId]);
+        if (!$managerExists->fetch()) {
+            throw new InvalidArgumentException("Менеджер с ID $managerId не найден");
+        }
+
         $stmt = $this->pdo->prepare('
             INSERT INTO "project" (
-                title, detaileddescription, startdate, plannedenddate, status, clientid
+                title, detaileddescription, startdate, plannedenddate, status, clientid, managerid
             ) VALUES (
-                :title, :description, :startDate, :plannedEndDate, :status, :clientId
+                :title, :description, :startDate, :plannedEndDate, :status, :clientId, :managerId
             )
             RETURNING id
         ');
@@ -77,14 +94,15 @@ class ProjectModel {
             'startDate' => $startDate ?: null,
             'plannedEndDate' => $plannedEndDate ?: null,
             'status' => $status,
-            'clientId' => $clientId
+            'clientId' => $clientId,
+            'managerId' => $managerId
         ]);
 
         return $stmt->fetchColumn();
     }
 
     // Обновить проект
-    public function updateProject($id, $title = null, $description = null, $startDate = null, $plannedEndDate = null, $status = null, $clientId = null) {
+    public function updateProject($id, $title = null, $description = null, $startDate = null, $plannedEndDate = null, $status = null, $clientId = null, $managerId = null) {
         if ($status && !in_array($status, self::ALLOWED_STATUSES)) {
             throw new InvalidArgumentException("Недопустимый статус: $status");
         }
@@ -97,6 +115,14 @@ class ProjectModel {
             }
         }
 
+        if ($managerId) {
+            $managerExists = $this->pdo->prepare('SELECT 1 FROM "User" WHERE ID = :id');
+            $managerExists->execute(['id' => $managerId]);
+            if (!$managerExists->fetch()) {
+                throw new InvalidArgumentException("Менеджер с ID $managerId не найден");
+            }
+        }
+
         $fields = [];
         $params = ['id' => $id];
 
@@ -106,6 +132,7 @@ class ProjectModel {
         if ($plannedEndDate !== null) { $fields[] = 'plannedenddate = :plannedEndDate'; $params['plannedEndDate'] = $plannedEndDate ?: null; }
         if ($status !== null) { $fields[] = 'status = :status'; $params['status'] = $status; }
         if ($clientId !== null) { $fields[] = 'clientid = :clientId'; $params['clientId'] = $clientId; }
+        if ($managerId !== null) { $fields[] = 'managerid = :managerId'; $params['managerId'] = $managerId; }
 
         if (empty($fields)) {
             throw new InvalidArgumentException("Нет данных для обновления");

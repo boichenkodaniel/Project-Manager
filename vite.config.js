@@ -6,6 +6,7 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 main: './index.html',
+                login: './login.html',
                 tasks: './tasks.html',
                 projects: './projects.html',
                 issues: './issues.html',
@@ -20,7 +21,7 @@ export default defineConfig({
             '/api': {
                 target: 'http://localhost:8000',   // ← где запущен php -S
                 changeOrigin: true,
-                rewrite: (path) => path.replace(/^\/api/, '/index.php'),
+                rewrite: (path) => path.replace(/^\/api/, ''),
                 configure: (proxy, _options) => {
                     // Обеспечиваем передачу query-параметров (action=..., id=...)
                     proxy.on('proxyReq', (proxyReq, req) => {

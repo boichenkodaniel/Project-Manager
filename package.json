@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "backend": "cd src/backend && C:/Users/danie/Downloads/php/php -S localhost:8000",
+    "backend": "cd src/backend && php -S localhost:8000",
     "dev:full": "concurrently \"npm run backend\" \"vite\""
   },
   "devDependencies": {

@@ -134,4 +134,35 @@ class ReportModel {
         $stmt->execute($params);
         return $stmt->fetchAll();
     }
-}
+
+    // НОВЫЙ: Получить статистику по выполненным задачам за период
+    public function getTasksStats($period = 'week') {
+        $sql = ''
+            . 'SELECT ' . PHP_EOL
+            . '    COUNT(id) AS count,' . PHP_EOL
+            . '    TO_CHAR(enddate, ''Dy'') AS day_of_week' . PHP_EOL
+            . 'FROM "task" ' . PHP_EOL
+            . 'WHERE status = ''completed''' . PHP_EOL
+            . '  AND enddate >= NOW() - INTERVAL ''1 $period''' . PHP_EOL // фильтр по периоду
+            . 'GROUP BY day_of_week, enddate ' . PHP_EOL
+            . 'ORDER BY enddate ASC;';
+
+        $stmt = $this->pdo->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // НОВЫЙ: Получить статистику по открытым issues по проектам
+    public function getIssuesStats() {
+        $sql = '
+            SELECT 
+                COUNT(i.id) AS count,
+                p.title AS project_title
+            FROM "Issue" i
+            JOIN "project" p ON i.ProjectID = p.id
+            WHERE i.status = 'open'
+            GROUP BY p.title
+            ORDER BY count DESC;
+        ';
+        $stmt = $this->pdo->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }

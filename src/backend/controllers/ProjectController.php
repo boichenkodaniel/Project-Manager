@@ -17,9 +17,32 @@ class ProjectController {
 
     // GET ?action=projects.index
     public function index() {
+        AuthMiddleware::requireAuth();
+        
         try {
-            $projects = $this->model->getAllProjects(false); // без менеджера
-            $this->json(['success' => true, 'data' => $projects]);
+            $projects = $this->model->getAllProjects();
+            
+            // Фильтрация по ролям
+            if (isset($_SESSION['user_role'])) {
+                if ($_SESSION['user_role'] === 'Клиент') {
+                    // Клиенты видят только свои проекты
+                    $projects = array_filter($projects, function($p) {
+                        return $p['clientid'] == $_SESSION['user_id'];
+                    });
+                } elseif ($_SESSION['user_role'] === 'Исполнитель') {
+                    // Исполнители видят проекты, в которых участвуют через задачи
+                    $pdo = Database::getInstance();
+                    $stmt = $pdo->prepare('SELECT DISTINCT projectid FROM "task" WHERE taskto = :user_id OR taskby = :user_id');
+                    $stmt->execute(['user_id' => $_SESSION['user_id']]);
+                    $projectIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                    $projects = array_filter($projects, function($p) use ($projectIds) {
+                        return in_array($p['id'], $projectIds);
+                    });
+                }
+                // Администратор и Руководитель проектов видят все проекты
+            }
+            
+            $this->json(['success' => true, 'data' => array_values($projects)]);
         } catch (Exception $e) {
             $this->json(['success' => false, 'error' => 'Ошибка получения проектов: ' . $e->getMessage()], 500);
         }
@@ -45,6 +68,9 @@ class ProjectController {
 
     // POST ?action=projects.create
     public function create() {
+        // Только руководитель проектов и админ могут создавать проекты
+        AuthMiddleware::requireRole(['Руководитель проектов', 'Администратор']);
+        
         $input = json_decode(file_get_contents('php://input'), true);
         if (!$input) {
             $this->json(['success' => false, 'error' => 'Тело запроса должно быть в формате JSON'], 400);
@@ -64,8 +90,21 @@ class ProjectController {
                 $input['startdate'] ?? null,
                 $input['plannedenddate'] ?? null,
                 $input['status'],
-                $input['clientid']
+                $input['clientid'],
+                $_SESSION['user_id'] // managerid = текущий пользователь
             );
+            
+            // Отправляем уведомление клиенту проекта
+            $notificationModel = new NotificationModel();
+            $notificationModel->createNotification(
+                $input['clientid'],
+                'Новый проект создан',
+                "Создан проект: {$input['title']}",
+                'info',
+                'project',
+                $id
+            );
+
             $project = $this->model->getProjectById($id);
             $this->json(['success' => true, 'message' => 'Проект создан', 'data' => $project], 201);
         } catch (InvalidArgumentException $e) {
@@ -94,7 +133,8 @@ class ProjectController {
                 $input['startdate'] ?? null,
                 $input['plannedenddate'] ?? null,
                 $input['status'] ?? null,
-                $input['clientid'] ?? null
+                $input['clientid'] ?? null,
+                $input['managerid'] ?? null
             );
 
             if ($updated) {

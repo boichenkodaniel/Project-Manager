@@ -1,12 +1,25 @@
-const modal = document.getElementById('create-modal')
-const tabs = document.querySelectorAll('.tab')
-const forms = document.querySelectorAll('.form')
-const modalTitle = document.querySelector('[data-modal-title]')
+let modal = null;
+let tabs = null;
+let forms = null;
+let modalTitle = null;
 let modalMode = 'create' // 'create' | 'edit'
 let currentEntity = null
 let currentId = null
 let users = [];
 let projects = [];
+
+function initModalElements() {
+  modal = document.getElementById('create-modal');
+  tabs = document.querySelectorAll('.tab');
+  forms = document.querySelectorAll('.form');
+  modalTitle = document.querySelector('[data-modal-title]');
+  
+  if (!modal) {
+    console.error('Modal element not found!');
+    return false;
+  }
+  return true;
+}
 const TITLES = {
   task: 'Add Task',
   user: 'Add User',
@@ -14,6 +27,10 @@ const TITLES = {
 }
 
 function switchTab(type) {
+  if (!tabs || !forms || !modalTitle) {
+    if (!initModalElements()) return;
+  }
+  
   tabs.forEach(tab => {
     tab.classList.toggle('tab--active', tab.dataset.tab === type)
   })
@@ -21,10 +38,17 @@ function switchTab(type) {
   forms.forEach(form => {
     form.classList.toggle('form--active', form.dataset.form === type)
   })
-  modalTitle.textContent = TITLES[type]
+  if (modalTitle) {
+    modalTitle.textContent = TITLES[type]
+  }
 }
 
 async function openModal({ type, mode = 'create', data = null }) {
+  if (!modal && !initModalElements()) {
+    console.error('Cannot open modal: modal element not found');
+    return;
+  }
+  
   modalMode = mode
   currentEntity = type
   currentId = data?.id ?? null
@@ -51,10 +75,38 @@ async function openModal({ type, mode = 'create', data = null }) {
       await loadUsersAndProjects();
 
       const form = document.querySelector('.form[data-form="project"]');
+      
+      console.log('Loaded users for project:', users);
+      
+      // Фильтруем только клиентов для селекта клиентов проекта
+      const clients = users.filter(user => {
+        const role = user.role || '';
+        const isClient = role === 'Клиент' || 
+                        role === 'client' || 
+                        role.toLowerCase() === 'клиент' ||
+                        role.toLowerCase() === 'client';
+        console.log(`User ${user.fullname || user.id}: role="${role}", isClient=${isClient}`);
+        return isClient;
+      });
+
+      console.log('Filtered clients:', clients);
+      console.log('All users roles for debugging:', users.map(u => ({ id: u.id, name: u.fullname, role: u.role })));
+
+      const clientSelect = form.querySelector('[name="projectClient"]');
+      if (!clientSelect) {
+        console.error('Client select not found!');
+        return;
+      }
+
+      if (clients.length === 0) {
+        console.warn('⚠️ No clients found! Available users:', users);
+        console.warn('Make sure you have users with role "Клиент" in the database');
+        console.warn('Check with: SELECT id, fullname, role FROM "User" WHERE role = \'Клиент\';');
+      }
 
       populateSelect(
-        form.querySelector('[name="projectClient"]'),
-        users,
+        clientSelect,
+        clients,
         'id',
         'fullname'
       );
@@ -65,6 +117,8 @@ async function openModal({ type, mode = 'create', data = null }) {
 
 
 function updateModalTitle(type, mode) {
+  if (!modalTitle && !initModalElements()) return;
+  
   const titles = {
     task: { create: 'Add Task', edit: 'Edit Task' },
     user: { create: 'Add User', edit: 'Edit User' },
@@ -93,17 +147,35 @@ async function fillForm(type, data) {
   if (!form || !data) return;
 
   if (type === 'task') {
+    // Фильтруем пользователей для назначения задач (исполнители и руководители)
+    const assignableUsers = users.filter(user => 
+      user.role === 'employee' || 
+      user.role === 'manager' ||
+      user.role === 'admin'
+    );
 
-
-    // 2. Наполняем select и сразу выставляем выбранное значение
+    // Наполняем select и сразу выставляем выбранное значение
     populateSelect(form.querySelector('[name="taskProject"]'), projects, 'id', 'title', data.taskProject);
-    populateSelect(form.querySelector('[name="taskBy"]'), users, 'id', 'fullname', data.taskBy);
-    populateSelect(form.querySelector('[name="taskTo"]'), users, 'id', 'fullname', data.taskTo);
+    populateSelect(form.querySelector('[name="taskBy"]'), assignableUsers, 'id', 'fullname', data.taskBy);
+    populateSelect(form.querySelector('[name="taskTo"]'), assignableUsers, 'id', 'fullname', data.taskTo);
   }
   if (type === 'project') {
+    // Фильтруем только клиентов для селекта клиентов проекта
+    const clients = users.filter(user => {
+      const role = user.role || '';
+      const isClient = role === 'Клиент' || 
+                      role === 'client' || 
+                      role.toLowerCase() === 'клиент' ||
+                      role.toLowerCase() === 'client';
+      console.log(`[fillForm] User ${user.fullname || user.id}: role="${role}", isClient=${isClient}`);
+      return isClient;
+    });
+    
+    console.log('[fillForm] Filtered clients for edit:', clients);
+    
     populateSelect(
       form.querySelector('[name="projectClient"]'),
-      users,
+      clients,
       'id',
       'fullname',
       data.projectClient
@@ -133,15 +205,34 @@ function clearForm(type) {
   const form = document.querySelector(`.form[data-form="${type}"]`)
   form.reset()
 }
-async function fetchUsers() {
-  const res = await fetch('/api?action=user.index'); // или нужный тебе эндпоинт
+async function fetchUsers(filterRole = null) {
+  let url = '/api?action=user.index';
+  if (filterRole) {
+    url += `&role=${filterRole}`;
+  }
+  
+  console.log('Fetching users from:', url);
+  
+  const res = await fetch(url);
+  
+  if (!res.ok) {
+    console.error('HTTP error:', res.status, res.statusText);
+    const errorText = await res.text();
+    console.error('Error response:', errorText);
+    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  }
+  
   const result = await res.json();
+  console.log('Users API response:', result);
 
   if (!result.success) {
+    console.error('API error:', result.error);
     throw new Error(result.error || 'Ошибка загрузки пользователей');
   }
 
-  return result.data || [];
+  const userData = result.data || [];
+  console.log('Returning users:', userData);
+  return userData;
 }
 
 async function fetchProjects() {
@@ -156,18 +247,62 @@ async function fetchProjects() {
 }
 
 async function loadUsersAndProjects() {
-  users = await fetchUsers();
+  try {
+    console.log('Loading users and projects...');
+    
+    // Загружаем всех пользователей (для админов и руководителей) или только нужных ролей
+    try {
+      users = await fetchUsers();
+      console.log('Fetched users:', users);
+      console.log('Users count:', users.length);
+      
+      // Выводим роли всех пользователей для отладки
+      if (users.length > 0) {
+        console.log('User roles:', users.map(u => ({ id: u.id, name: u.fullname, role: u.role })));
+      }
+    } catch (error) {
+      console.error('Error fetching all users:', error);
+      // Если нет доступа, пробуем загрузить только клиентов и исполнителей
+      try {
+        console.log('Trying to fetch clients and employees separately...');
+        const clients = await fetchUsers('client').catch(() => []);
+        const employees = await fetchUsers('employee').catch(() => []);
+        users = [...clients, ...employees];
+        console.log('Fetched clients and employees:', users);
+      } catch (e) {
+        console.error('Error fetching filtered users:', e);
+        users = [];
+      }
+    }
 
+    if (!users || users.length === 0) {
+      console.warn('⚠️ No users loaded! This might be a permissions issue.');
+      console.warn('Current user role:', localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).role : 'unknown');
+    }
 
-  projects = await fetchProjects();
+    projects = await fetchProjects();
+    console.log('Fetched projects:', projects);
+  } catch (error) {
+    console.error('Ошибка загрузки данных:', error);
+    // НЕ очищаем users, если они уже загружены - это позволяет использовать их даже при ошибке загрузки проектов
+    if (!users || users.length === 0) {
+      users = [];
+    }
+    projects = [];
+  }
 }
 
 
 function closeModal() {
+  if (!modal && !initModalElements()) {
+    return;
+  }
   modal.classList.add('hidden')
 }
 
 function initFormTabs() {
+  if (!tabs && !initModalElements()) return;
+  
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
       switchTab(tab.dataset.tab)
@@ -176,6 +311,8 @@ function initFormTabs() {
 }
 
 function initFormSubmit() {
+  if (!forms && !initModalElements()) return;
+  
   forms.forEach(form => {
     form.addEventListener('submit', e => {
       e.preventDefault();
@@ -204,10 +341,11 @@ function initFormSubmit() {
 
 function mapRoleForDB(role) {
   switch (role) {
-    case 'admin': return 'Администратор';
-    case 'employee': return 'Исполнитель'; // или 'Руководитель' в зависимости от того, что нужно
-    case 'client': return 'Клиент';
-    default: return role; // на всякий случай
+    case 'admin': return 'admin';
+    case 'manager': return 'manager';
+    case 'employee': return 'employee';
+    case 'client': return 'client';
+    default: return role;
   }
 }
 
@@ -217,8 +355,13 @@ async function createUser(data) {
     const body = {
       fullname: data.userName,
       email: data.userEmail,
+      login: data.userLogin,
+      password: data.userPassword,
       role: mapRoleForDB(data.userRole) // приводим к значению для базы
     };
+
+    console.log('Отправляемые данные для создания пользователя:', body);
+    console.log('Пароль в данных:', data.userPassword ? 'Есть' : 'Отсутствует');
 
     const response = await fetch(`/api?action=user.create`, {
       method: 'POST',
@@ -227,6 +370,7 @@ async function createUser(data) {
     });
 
     const result = await response.json();
+    console.log('Ответ сервера при создании пользователя:', result);
 
     if (!result.success) {
       throw new Error(result.error || 'Ошибка создания пользователя');
@@ -234,6 +378,7 @@ async function createUser(data) {
 
     // result.data теперь содержит объект нового пользователя с id
     const newUser = result.data;
+    console.log('Созданный пользователь:', newUser);
 
     console.log('User created:', newUser);
 
@@ -286,6 +431,14 @@ async function updateUser(id, data) {
       email: data.userEmail,
       role: mapRoleForDB(data.userRole)
     };
+    
+    // Добавляем login и password только если они указаны
+    if (data.userLogin) {
+      body.login = data.userLogin;
+    }
+    if (data.userPassword) {
+      body.password = data.userPassword;
+    }
 
     const response = await fetch(`/api?action=user.update&id=${id}`, {
       method: 'POST',
@@ -317,6 +470,9 @@ function updateUserInDOM(id, data) {
   // Обновляем dataset
   li.dataset.role = data.userRole;
   li.dataset.email = data.userEmail;
+  if (data.userLogin) {
+    li.dataset.login = data.userLogin;
+  }
 
   // Обновляем имя в DOM
   const nameEl = li.querySelector('[data-user-name]');
@@ -402,10 +558,21 @@ async function createTask(data) {
 
 function mapTaskStatusForDB(status) {
   switch (status) {
-    case 'pending': return 'В работе';
-    case 'in-progress': return 'На проверке';
-    case 'done': return 'Выполнена';
-    default: return 'В работе';
+    case 'pending': return 'pending';
+    case 'in-progress': return 'in-progress';
+    case 'on-review': return 'on-review';
+    case 'completed': return 'completed';
+    default: return 'pending';
+  }
+}
+
+function mapTaskStatusFromDB(status) {
+  switch (status) {
+    case 'К выполнению': return 'pending';
+    case 'В работе': return 'in-progress';
+    case 'На проверке': return 'on-review';
+    case 'Выполнена': return 'completed';
+    default: return 'pending';
   }
 }
 function addTaskToDOM(task) {
@@ -620,13 +787,15 @@ function removeTaskFromDOM(id) {
 
 async function createProject(data) {
   try {
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
     const body = {
       title: data.projectName,
       detaileddescription: data.projectDescription,
-      clientid: data.projectClient, // правильно
+      clientid: data.projectClient,
       startdate: data.projectStartDate,
       plannedenddate: data.projectEndDate,
       status: "Черновик",
+      managerid: currentUser.id // добавляем managerid
     };
 
     const res = await fetch('/api?action=projects.create', {
@@ -681,6 +850,7 @@ function addProjectToDOM(project) {
 
 async function updateProject(id, data) {
   try {
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
     const body = {
       title: data.projectName || null,
       detaileddescription: data.projectDescription || null,
@@ -688,7 +858,7 @@ async function updateProject(id, data) {
       startdate: data.projectStartDate || null,
       plannedenddate: data.projectEndDate || null,
       status: data.projectStatus || null,
-      managerid: data.projectClient || null
+      managerid: data.projectManager || currentUser.id // используем projectManager если есть, иначе текущий пользователь
     };
 
     const response = await fetch(`/api?action=projects.update&id=${id}`, {
@@ -745,19 +915,33 @@ async function deleteProject(id) {
 }
 
 function initModalButtons() {
+  // Удаляем старые обработчики, если они есть
   document.querySelectorAll('[data-open]').forEach(btn => {
-    btn.addEventListener('click', () => {
+    // Клонируем элемент, чтобы удалить все обработчики
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+    
+    newBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const type = newBtn.dataset.open;
+      console.log('Opening modal for type:', type);
       openModal({
-        type: btn.dataset.open,
+        type: type,
         mode: 'create'
-      })
-
-    })
-  })
+      });
+    });
+  });
 
   document.querySelectorAll('[data-close-modal]').forEach(el => {
-    el.addEventListener('click', closeModal)
-  })
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeModal();
+    });
+  });
+  
+  console.log('Modal buttons initialized. Found', document.querySelectorAll('[data-open]').length, 'buttons');
 }
 
 // document.addEventListener('click', e => {
@@ -783,29 +967,76 @@ function initModalButtons() {
 // })
 
 function populateSelect(selectEl, items, valueKey, textKey, selectedValue = '') {
-  if (!selectEl) return;
+  if (!selectEl) {
+    console.error('Select element not found for populateSelect');
+    return;
+  }
+  
+  console.log(`Populating select with ${items ? items.length : 0} items, valueKey=${valueKey}, textKey=${textKey}`);
+  console.log('Items to populate:', items);
+  
   selectEl.innerHTML = ''; // очистим старые опции
   const defaultOption = document.createElement('option');
   defaultOption.value = '';
   defaultOption.textContent = '— Select —';
   selectEl.appendChild(defaultOption);
 
+  if (!items || items.length === 0) {
+    console.warn('No items to populate select with!');
+    const emptyOption = document.createElement('option');
+    emptyOption.value = '';
+    emptyOption.textContent = '— Нет доступных вариантов —';
+    emptyOption.disabled = true;
+    selectEl.appendChild(emptyOption);
+    return;
+  }
+
+  let addedCount = 0;
   items.forEach(item => {
+    const value = item[valueKey];
+    const text = item[textKey];
+    
+    if (value === null || value === undefined) {
+      console.warn('Skipping item with null/undefined value:', item);
+      return;
+    }
+    
+    if (!text) {
+      console.warn('Skipping item with empty text:', item);
+      return;
+    }
+    
     const option = document.createElement('option');
-    option.value = item[valueKey];
-    option.textContent = item[textKey];
-    if (String(item[valueKey]) === String(selectedValue)) {
+    option.value = value;
+    option.textContent = text;
+    if (String(value) === String(selectedValue)) {
       option.selected = true;
     }
     selectEl.appendChild(option);
+    addedCount++;
   });
+  
+  console.log(`Select populated: ${addedCount} options added`);
 
 }
 
 export function initCreateForm() {
-  initModalButtons()
-  initFormTabs()
-  initFormSubmit()
+  // Инициализируем элементы модального окна
+  if (!initModalElements()) {
+    console.error('Modal elements not found, retrying...');
+    setTimeout(() => {
+      if (initModalElements()) {
+        initModalButtons();
+        initFormTabs();
+        initFormSubmit();
+      }
+    }, 100);
+    return;
+  }
+  
+  initModalButtons();
+  initFormTabs();
+  initFormSubmit();
 }
 
 let openedMenu = null
@@ -887,18 +1118,21 @@ function getEntityData(type, id) {
       id,
       userName: li.dataset.name || li.querySelector('[data-user-name]')?.textContent,
       userEmail: li.dataset.email,
+      userLogin: li.dataset.login || '',
       userRole: li.dataset.role
     };
   }
 
   if (type === 'task') {
     const item = document.querySelector(`.activity-item[data-id="${id}"]`);
+    const statusText = item.querySelector('[data-task-status]')?.textContent || '';
+    const statusValue = mapTaskStatusFromDB(statusText);
 
     return {
       id,
       taskName: item.querySelector('[data-task-name]')?.textContent || '',
       taskDescription: item.querySelector('[data-task-description]')?.textContent || '',
-      taskStatus: item.querySelector('[data-task-status]')?.textContent || '',
+      taskStatus: statusValue,
 
       taskBy: item.querySelector('[data-task-by]')?.dataset.userId || '',
       taskTo: item.querySelector('[data-task-to]')?.dataset.userId || '',

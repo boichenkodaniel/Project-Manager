@@ -23,14 +23,23 @@ class Project {
   }
 
   async fetchProjects() {
-    const res = await fetch('/api?action=projects.index');
-    const result = await res.json();
+    try {
+      const res = await fetch('/api?action=projects.index');
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      const result = await res.json();
 
-    if (!result.success) {
-      throw new Error(result.error || 'Ошибка API');
+      if (!result.success) {
+        console.error('Ошибка API проектов:', result.error);
+        return [];
+      }
+
+      return result.data || [];
+    } catch (error) {
+      console.error('Ошибка загрузки проектов:', error);
+      return [];
     }
-
-    return result.data || [];
   }
 
   render() {

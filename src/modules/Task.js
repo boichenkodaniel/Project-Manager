@@ -7,12 +7,13 @@ class Task {
         dataToWorker: "[data-task-to-worker]",
         dataTaskContainer: "[data-task-container]",
         dataTotal: "[data-total-tasks]",
+        dataTaskContainerInDashboard: "[data-task-container-in-dashboard]", // Добавляем для дашборда
     };
 
     taskList = [];
 
     constructor() {
-        this.loadAndRender();
+        // Конструктор теперь просто инициализирует, загрузка будет через явные методы
     }
 
     async loadAndRender() {
@@ -27,32 +28,61 @@ class Task {
         }
     }
 
-    async fetchTasks() {
-        const response = await fetch('/api?action=task.index');
-        const result = await response.json();
-
-        if (!result.success) {
-            throw new Error(result.error || 'Ошибка API');
+    async loadRecentCompletedTasks() {
+        try {
+            const tasks = await this.fetchTasks('status=completed&limit=5'); // Ограничение на 5 последних завершенных
+            this.taskList = this.mapTasksToView(tasks);
+            const container = document.querySelector(this.root.dataTaskContainerInDashboard);
+            if (container) {
+                container.innerHTML = '';
+                this.taskList.forEach(task => {
+                    const taskElement = this.createTaskLayout(task, document.querySelector(this.root.dataTemplate));
+                    container.appendChild(taskElement);
+                });
+            }
+            // renderInfoToDashboard относится к общему количеству задач, может не подходить для дашборда
+        } catch (e) {
+            console.error('Ошибка загрузки последних завершенных задач:', e);
         }
+    }
 
-        return result.data || [];
+    async fetchTasks(queryParams = '') {
+        try {
+            const url = `/api?action=task.index${queryParams ? '&' + queryParams : ''}`;
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${(await response.text()) || 'Unknown error'}`);
+            }
+            const result = await response.json();
+
+            if (!result.success) {
+                console.error('Ошибка API задач:', result.error);
+
+                return [];
+            }
+
+            return result.data || [];
+        } catch (error) {
+            console.error('Ошибка загрузки задач:', error);
+            return [];
+        }
     }
 
 
     mapTasksToView(tasks) {
         return tasks.map(task => ({
-            id: task.id,
-            name: task.title,
-            description: task.description || '—',
-            byWorker: task.creator_fullname || '—',
-            byWorkerId: task.creator_id ?? '',       // <-- добавляем ID
-            toWorker: task.executor_fullname || '—',
-            toWorkerId: task.executor_id ?? '',     // <-- добавляем ID
-            projectId: task.projectid,
+            id: task.ID || task.id,
+            name: task.Title || task.title || '—',
+            description: task.Description || task.description || '—',
+            byWorker: task.creator_fullname || task.creator_fullname || '—',
+            byWorkerId: task.TaskBy || task.TaskByID || '',       
+            toWorker: task.executor_fullname || task.executor_fullname || '—',
+            toWorkerId: task.TaskTo || task.TaskToID || '',     
+            projectId: task.ProjectID || task.projectid,
             projectTitle: task.project_title || '—',
-            status: task.status || 'К выполнению',
-            startDate: task.startdate || null,
-            endDate: task.enddate || null
+            status: task.Status || task.status || 'К выполнению',
+            startDate: task.StartDate || task.startdate || null,
+            endDate: task.EndDate || task.enddate || null
         }));
     }
 

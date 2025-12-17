@@ -7,18 +7,68 @@ class ChartModule {
         this.initCharts();
     }
 
-    initCharts() {
+    async initCharts() {
         const taskCanvas = document.querySelector('[data-task-chart]');
         const issuesCanvas = document.querySelector('[data-issues-chart]');
 
         if (taskCanvas) {
             this.taskCtx = taskCanvas.getContext('2d');
-            this.taskChart();
+            const taskStats = await this.fetchTaskStats();
+            this.taskChart(taskStats);
         }
 
         if (issuesCanvas) {
             this.issuesCtx = issuesCanvas.getContext('2d');
-            this.issuesChart();
+            const issueStats = await this.fetchIssuesStats();
+            this.issuesChart(issueStats);
+        }
+    }
+
+    async fetchChartData(action, params = {}) {
+        const query = new URLSearchParams(params).toString();
+        const res = await fetch(`/api?action=${action}&${query}`);
+        
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const result = await res.json();
+        if (!result.success) {
+            throw new Error(result.error || 'Failed to fetch chart data');
+        }
+        return result.data;
+    }
+
+    async fetchTaskStats() {
+        try {
+            const data = await this.fetchChartData('reports.getTasksStats', { period: 'week' });
+            // Преобразование данных для графика
+            const labels = [];
+            const counts = [];
+            data.forEach(item => {
+                labels.push(item.day_of_week);
+                counts.push(parseInt(item.count, 10));
+            });
+            return { labels, counts };
+        } catch (error) {
+            console.error('Error fetching task stats:', error);
+            return { labels: [], counts: [] };
+        }
+    }
+
+    async fetchIssuesStats() {
+        try {
+            const data = await this.fetchChartData('reports.getIssuesStats');
+            // Преобразование данных для графика
+            const labels = [];
+            const counts = [];
+            data.forEach(item => {
+                labels.push(item.project_title);
+                counts.push(parseInt(item.count, 10));
+            });
+            return { labels, counts };
+        } catch (error) {
+            console.error('Error fetching issues stats:', error);
+             return { labels: [], counts: [] };
         }
     }
 
@@ -61,15 +111,16 @@ class ChartModule {
         };
     }
 
-    taskChart() {
+    taskChart(stats) {
         const theme = this.darkTheme();
+        const maxCount = Math.max(...stats.counts, 0) + 1; // +1 для отступа
         new Chart(this.taskCtx, {
             type: 'bar',
             data: {
-                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+                labels: stats.labels,
                 datasets: [{
                     label: 'Tasks Completed',
-                    data: [3, 5, 4, 1, 3, 3],
+                    data: stats.counts,
                     backgroundColor: '#cccccc',
                     borderRadius: 6,
                 }]
@@ -100,22 +151,23 @@ class ChartModule {
                     ...theme.scales,
                     y: {
                         ...theme.scales.y,
-                        max: 6
+                        max: maxCount
                     },
                 }
             }
         });
     }
 
-    issuesChart() {
+    issuesChart(stats) {
         const theme = this.darkTheme();
+        const maxCount = Math.max(...stats.counts, 0) + 1; // +1 для отступа
         new Chart(this.issuesCtx, {
             type: 'bar',
             data: {
-                labels: ['Project 1', 'Project 2', 'Project 3', 'Project 4'],
+                labels: stats.labels,
                 datasets: [{
                     label: 'Open Issues',
-                    data: [3, 5, 4, 1],
+                    data: stats.counts,
                     backgroundColor: '#cccccc',
                     borderRadius: 6,
                 }]
@@ -157,7 +209,7 @@ class ChartModule {
                     ...theme.scales,
                     x: {
                         ...theme.scales.x,
-                        max: 6,
+                        max: maxCount,
                         ticks: {
                             display: false
                         }
@@ -175,6 +227,7 @@ class ChartModule {
             }
         });
     }
+
 }
 
 export default ChartModule;

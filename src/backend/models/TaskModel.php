@@ -4,7 +4,7 @@
 class TaskModel {
     private $pdo;
 
-    private const ALLOWED_STATUSES = ['В работе', 'На проверке', 'Выполнена'];
+    private const ALLOWED_STATUSES = ['К выполнению', 'В работе', 'На проверке', 'Выполнена'];
 
     public function __construct() {
         $this->pdo = Database::getInstance();
