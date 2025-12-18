@@ -5,22 +5,27 @@ body{
   color:#FFF;
   font-family: "Gotham",sans-serif;
   font-weight: 400;
+  min-height: 100vh;
 }  
 
 .wrapper{
   background: #1D232A;
   display: flex;
   padding: 10px;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 .aside {
   border-radius: 15px;
   background-color: #191E24;
   padding: 10px;
-  width: 384px;
+  width: 30dvw;
+  height: 97dvh;
   display: flex;
   flex-direction: column;
+  position: sticky;
+  top: 10px;
+  align-self: flex-start;
 }
 
 .navigation {
