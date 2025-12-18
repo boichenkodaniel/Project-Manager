@@ -34,7 +34,8 @@ class TaskController {
                     $projectIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
                     
                     $tasks = array_filter($tasks, function($task) use ($projectIds) {
-                        return in_array($task['ProjectID'], $projectIds);
+                        $projectId = $task['ProjectID'] ?? $task['projectid'] ?? null;
+                        return $projectId !== null && in_array($projectId, $projectIds);
                     });
                 } elseif ($userRole === 'Исполнитель') {
                     // Исполнители видят только свои задачи
@@ -47,9 +48,10 @@ class TaskController {
                     // Руководитель видит только задачи из своих проектов
                     $projectModel = new ProjectModel();
                     $tasks = array_filter($tasks, function($task) use ($projectModel, $userId) {
-                        if (!isset($task['ProjectID'])) return false;
-                        $project = $projectModel->getProjectById($task['ProjectID']);
-                        return $project && isset($project['managerid']) && $project['managerid'] == $userId;
+                        $projectId = $task['ProjectID'] ?? $task['projectid'] ?? null;
+                        if (!$projectId) return false;
+                        $project = $projectModel->getProjectById($projectId);
+                        return $project && isset($project['managerid']) && (int)$project['managerid'] === (int)$userId;
                     });
                 }
                 // Администратор и Руководитель проектов видят все задачи
@@ -115,21 +117,26 @@ class TaskController {
                 $input['Status'] ?? 'В работе'
             );
             
+            // После создания задачи обновляем статус проекта
+            if (!empty($input['ProjectID'])) {
+                $projectModel = new ProjectModel();
+                $projectModel->updateProjectStatusBasedOnTasks($input['ProjectID']);
+            }
+            
             // Отправляем уведомления участникам проекта
             $notificationModel = new NotificationModel();
             $notificationModel->notifyTaskParticipants(
                 $id,
-                'Новая задача создана',
                 "Создана задача: {$input['Title']}",
                 'info',
-                $_SESSION['user_id']
+                $_SESSION['user_id'],               // исключаем создателя
+                $input['ExecutorID'] ?? null        // и исполнителя (у него своё отдельное уведомление)
             );
             
             // Если назначен исполнитель, отправляем ему отдельное уведомление
             if (!empty($input['ExecutorID'])) {
                 $notificationModel->createNotification(
                     $input['ExecutorID'],
-                    'Вам назначена задача',
                     "Вам назначена задача: {$input['Title']}",
                     'warning',
                     'task',
@@ -245,25 +252,22 @@ class TaskController {
         } elseif ($userRole === 'Руководитель') {
             // Руководитель может обновлять задачи только в своих проектах
             $projectModel = new ProjectModel();
-            $project = $projectModel->getProjectById($task['ProjectID']);
-            if ($project && isset($project['managerid']) && $project['managerid'] == $userId) {
+            $projectId = $task['ProjectID'] ?? $task['projectid'] ?? null;
+            $project = $projectId ? $projectModel->getProjectById($projectId) : null;
+            if ($project && isset($project['managerid']) && (int)$project['managerid'] === (int)$userId) {
                 // Разрешаем обновление - продолжаем выполнение
                 error_log("Access granted: Manager (own project)");
             } else {
-                error_log("Access denied: Manager trying to update task in project they don't own");
+                error_log("Access denied: Manager trying to update task in project they don't own. projectId=" . var_export($projectId, true));
                 $this->json(['success' => false, 'error' => 'Вы можете обновлять задачи только в своих проектах'], 403);
             }
         } elseif ($userRole === 'Администратор') {
-            // Администратор может обновлять задачи, но не может принимать их
-            if (isset($input['Status']) && $input['Status'] === 'Выполнена') {
-                error_log("Access denied: Admin cannot accept tasks");
-                $this->json(['success' => false, 'error' => 'Администратор не может принимать задачи. Только руководитель проекта может принимать задачи.'], 403);
-            }
-            // Разрешаем обновление для администратора (кроме принятия задач)
-            error_log("Access granted: Admin (but cannot accept tasks)");
+            // Администратор может обновлять любые задачи, включая принятие
+            error_log("Access granted: Admin");
         } elseif ($userRole === 'Исполнитель') {
-            // Исполнитель может обновлять свою задачу (особенно статус)
-            // Также может взять не назначенную задачу (TaskTo = null) в работу
+            // Исполнитель может:
+            // - взять не назначенную задачу в работу (установить Status='В работе' и TaskTo на себя)
+            // - менять только статус своих задач (В работе / На проверке / Выполнена)
             $isUnassignedTask = $taskTo === null;
             $isTakingTask = $isUnassignedTask && isset($input['Status']) && $input['Status'] === 'В работе';
             
@@ -274,9 +278,9 @@ class TaskController {
             // Проверяем, обновляется ли только статус на допустимые значения для исполнителя
             $isStatusUpdate = isset($input['Status']) && in_array($input['Status'], ['В работе', 'На проверке', 'Выполнена']);
             
-            if ($isExecutor) {
-                // Разрешаем обновление - продолжаем выполнение
-                error_log("Access granted: Executor updating own task (isExecutor=true, taskTo={$taskTo}, userId={$userId})");
+            if ($isExecutor && $onlyStatusUpdate && $isStatusUpdate) {
+                // Разрешаем обновление только статуса своей задачи
+                error_log("Access granted: Executor updating own task status (isExecutor=true, taskTo={$taskTo}, userId={$userId})");
             } elseif ($isTakingTask) {
                 // Разрешаем взять не назначенную задачу в работу
                 // При этом нужно также обновить TaskTo на текущего пользователя
@@ -301,14 +305,14 @@ class TaskController {
                     error_log("Access granted: Executor updating status (onlyStatusUpdate=true, task matches user, taskTo={$taskTo}, userId={$userId})");
                 } else {
                     error_log("Access denied: Executor trying to update status but task is not assigned to them. taskTo={$taskTo}, userId={$userId}");
-                    $this->json(['success' => false, 'error' => 'Доступ запрещён. Вы можете обновлять только задачи, назначенные вам.'], 403);
+                    $this->json(['success' => false, 'error' => 'Доступ запрещён.'], 403);
                 }
             } elseif ($isCreator && $onlyStatusUpdate) {
                 // Если создатель и обновляется только статус - разрешаем
                 error_log("Access granted: Creator updating task status");
             } else {
                 error_log("Access denied: Executor trying to update task. isExecutor=" . ($isExecutor ? 'true' : 'false') . ", isCreator=" . ($isCreator ? 'true' : 'false') . ", isUnassignedTask=" . ($isUnassignedTask ? 'true' : 'false') . ", isTakingTask=" . ($isTakingTask ? 'true' : 'false') . ", isSendingForReview=" . ($isSendingForReview ? 'true' : 'false') . ", isStatusUpdate=" . ($isStatusUpdate ? 'true' : 'false') . ", onlyStatusUpdate=" . ($onlyStatusUpdate ? 'true' : 'false') . ", taskTo={$taskTo}, userId={$userId}, taskToType=" . gettype($taskTo) . ", userIdType=" . gettype($userId));
-                $this->json(['success' => false, 'error' => 'Доступ запрещён. Вы можете обновлять только задачи, назначенные вам.'], 403);
+                $this->json(['success' => false, 'error' => 'Доступ запрещён.'], 403);
             }
         } else {
             // Для остальных ролей (клиенты и т.д.) - только если они создатель
@@ -336,9 +340,10 @@ class TaskController {
                 error_log("Task after update - TaskTo: " . var_export($updatedTask['TaskTo'] ?? 'null', true) . " (type: " . gettype($updatedTask['TaskTo'] ?? null) . "), Status: " . ($updatedTask['Status'] ?? 'null'));
                 
                 // Обновляем статус проекта на основе статусов задач
-                if (isset($updatedTask['ProjectID']) && $updatedTask['ProjectID']) {
+                $updatedProjectId = $updatedTask['ProjectID'] ?? $updatedTask['projectid'] ?? null;
+                if ($updatedProjectId) {
                     $projectModel = new ProjectModel();
-                    $projectModel->updateProjectStatusBasedOnTasks($updatedTask['ProjectID']);
+                    $projectModel->updateProjectStatusBasedOnTasks($updatedProjectId);
                 }
                 
                 // Отправляем уведомления при изменении статуса
@@ -348,20 +353,21 @@ class TaskController {
                     
                     // Получаем информацию о проекте для уведомления руководителя
                     $project = null;
-                    if (isset($updatedTask['ProjectID']) && $updatedTask['ProjectID']) {
-                        $project = $projectModel->getProjectById($updatedTask['ProjectID']);
+                    $updatedProjectId = $updatedTask['ProjectID'] ?? $updatedTask['projectid'] ?? null;
+                    if ($updatedProjectId) {
+                        $project = $projectModel->getProjectById($updatedProjectId);
                     }
                     
                     // Уведомление руководителю проекта при изменении статуса задачи
                     if ($project && isset($project['managerid']) && $project['managerid']) {
-                        $taskTitle = $updatedTask['Title'] ?? 'Задача';
+                        // Название задачи: стараемся взять из разных вариантов ключей
+                        $taskTitle = $updatedTask['Title'] ?? $updatedTask['title'] ?? 'Задача';
                         $executorName = $updatedTask['executor_fullname'] ?? 'Исполнитель';
                         
                         if ($input['Status'] === 'В работе') {
                             // Руководителю, когда исполнитель принял задачу в работу
                             $notificationModel->createNotification(
                                 $project['managerid'],
-                                'Задача взята в работу',
                                 "Исполнитель {$executorName} принял задачу '{$taskTitle}' в работу",
                                 'info',
                                 'task',
@@ -371,7 +377,6 @@ class TaskController {
                             // Руководителю, когда исполнитель отправил задачу на проверку
                             $notificationModel->createNotification(
                                 $project['managerid'],
-                                'Задача отправлена на проверку',
                                 "Исполнитель {$executorName} отправил задачу '{$taskTitle}' на проверку",
                                 'warning',
                                 'task',
@@ -382,7 +387,7 @@ class TaskController {
                     
                     // Уведомление исполнителю при изменении статуса (если он не сам изменил)
                     if (isset($updatedTask['TaskTo']) && $updatedTask['TaskTo'] && $updatedTask['TaskTo'] != $_SESSION['user_id']) {
-                        $taskTitle = $updatedTask['Title'] ?? 'Задача';
+                        $taskTitle = $updatedTask['Title'] ?? $updatedTask['title'] ?? 'Задача';
                         $statusMessages = [
                             'В работе' => 'Задача взята в работу',
                             'На проверке' => 'Задача отправлена на проверку',
@@ -392,7 +397,6 @@ class TaskController {
                         
                         $notificationModel->createNotification(
                             $updatedTask['TaskTo'],
-                            'Изменение статуса задачи',
                             "Статус задачи '{$taskTitle}' изменён: {$message}",
                             'info',
                             'task',
@@ -405,10 +409,9 @@ class TaskController {
                 $oldTaskTo = $task['TaskTo'] ?? $task['taskto'] ?? null;
                 if (isset($input['TaskTo']) && $input['TaskTo'] != $oldTaskTo) {
                     $notificationModel = new NotificationModel();
-                    $taskTitle = $updatedTask['Title'] ?? $task['Title'] ?? 'Задача';
+                    $taskTitle = $updatedTask['Title'] ?? $updatedTask['title'] ?? $task['Title'] ?? $task['title'] ?? 'Задача';
                     $notificationModel->createNotification(
                         $input['TaskTo'],
-                        'Вам назначена задача',
                         "Вам назначена задача: {$taskTitle}",
                         'warning',
                         'task',
@@ -416,33 +419,19 @@ class TaskController {
                     );
                 }
                 
-                // Уведомление при изменении других полей задачи (исполнителю)
-                $fieldsToNotify = ['Title', 'Description', 'StartDate', 'EndDate'];
-                $hasChanges = false;
-                $changedFields = [];
-                foreach ($fieldsToNotify as $field) {
-                    $oldValue = $task[$field] ?? null;
-                    $newValue = $input[$field] ?? null;
-                    if (isset($input[$field]) && $newValue != $oldValue) {
-                        $hasChanges = true;
-                        $fieldNames = [
-                            'Title' => 'Название',
-                            'Description' => 'Описание',
-                            'StartDate' => 'Дата начала',
-                            'EndDate' => 'Дата окончания'
-                        ];
-                        $changedFields[] = $fieldNames[$field] ?? $field;
-                    }
-                }
-                
-                if ($hasChanges && isset($updatedTask['TaskTo']) && $updatedTask['TaskTo'] && $updatedTask['TaskTo'] != $_SESSION['user_id']) {
+                // Уведомление исполнителю при успешном изменении задачи руководителем / админом
+                $shouldNotifyExecutor =
+                    isset($updatedTask['TaskTo']) &&
+                    $updatedTask['TaskTo'] &&
+                    $updatedTask['TaskTo'] != $_SESSION['user_id'] &&
+                    in_array($userRole, ['Руководитель', 'Руководитель проектов', 'Администратор'], true);
+
+                if ($shouldNotifyExecutor) {
                     $notificationModel = new NotificationModel();
-                    $taskTitle = $updatedTask['Title'] ?? 'Задача';
-                    $fieldsList = implode(', ', $changedFields);
+                    $taskTitle = $updatedTask['Title'] ?? $updatedTask['title'] ?? 'Задача';
                     $notificationModel->createNotification(
                         $updatedTask['TaskTo'],
-                        'Изменение задачи',
-                        "В назначенной вам задаче '{$taskTitle}' произошли изменения в полях: {$fieldsList}",
+                        "Ваша задача была изменена: {$taskTitle}",
                         'info',
                         'task',
                         $id
@@ -461,7 +450,15 @@ class TaskController {
     }
 
     public function delete($id) {
+        AuthMiddleware::requireAuth();
+        
         if (!$id || !is_numeric($id)) $this->json(['success' => false, 'error' => 'Некорректный ID задачи'], 400);
+
+        // Удалять задачи могут только администратор, руководитель проектов и руководитель
+        $userRole = $_SESSION['user_role'] ?? '';
+        if (!in_array($userRole, ['Администратор', 'Руководитель проектов', 'Руководитель'], true)) {
+            $this->json(['success' => false, 'error' => 'Доступ запрещён'], 403);
+        }
 
         try {
             $deleted = $this->model->deleteTask($id);

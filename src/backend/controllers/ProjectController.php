@@ -103,7 +103,6 @@ class ProjectController {
             $notificationModel = new NotificationModel();
             $notificationModel->createNotification(
                 $input['clientid'],
-                'Новый проект создан',
                 "Создан проект: {$input['title']}",
                 'info',
                 'project',

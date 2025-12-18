@@ -5,7 +5,7 @@ class ProjectModel {
     private $pdo;
 
     // Допустимые статусы
-    private const ALLOWED_STATUSES = ['Черновик', 'Активен', 'В работе', 'Завершён', 'Отменён'];
+    private const ALLOWED_STATUSES = ['Черновик', 'Активен', 'В работе', 'Завершен', 'Отменён'];
 
     public function __construct() {
         $this->pdo = Database::getInstance();
@@ -161,37 +161,33 @@ class ProjectModel {
         $stmt->execute(['projectId' => $projectId]);
         $tasks = $stmt->fetchAll(PDO::FETCH_COLUMN);
         
-        if (empty($tasks)) {
-            // Если задач нет, статус проекта остается без изменений
-            return false;
-        }
-        
-        // Проверяем, есть ли задачи в работе
-        $hasTasksInWork = in_array('В работе', $tasks);
-        
-        // Проверяем, все ли задачи выполнены
-        $allTasksCompleted = true;
-        foreach ($tasks as $taskStatus) {
-            if ($taskStatus !== 'Выполнена') {
-                $allTasksCompleted = false;
-                break;
-            }
-        }
-        
         // Получаем текущий статус проекта
         $project = $this->getProjectById($projectId);
         $currentStatus = $project['status'] ?? 'Черновик';
         
         $newStatus = null;
         
-        // Если есть задачи в работе и проект еще не активен - переводим в "Активен"
-        if ($hasTasksInWork && $currentStatus !== 'Активен' && $currentStatus !== 'В работе' && $currentStatus !== 'Завершён' && $currentStatus !== 'Отменён') {
-            $newStatus = 'Активен';
-        }
-        
-        // Если все задачи выполнены - переводим в "Завершён"
-        if ($allTasksCompleted && $currentStatus !== 'Завершён' && $currentStatus !== 'Отменён') {
-            $newStatus = 'Завершён';
+        // Если задач нет — проект должен быть в статусе "Черновик"
+        if (empty($tasks)) {
+            if ($currentStatus !== 'Черновик') {
+                $newStatus = 'Черновик';
+            }
+        } else {
+            // Проверяем, все ли задачи выполнены
+            $allTasksCompleted = true;
+            foreach ($tasks as $taskStatus) {
+                if ($taskStatus !== 'Выполнена') {
+                    $allTasksCompleted = false;
+                    break;
+                }
+            }
+
+            // Если все задачи выполнены - "Завершен", иначе - "Активен"
+            if ($allTasksCompleted && $currentStatus !== 'Завершен' && $currentStatus !== 'Отменён') {
+                $newStatus = 'Завершен';
+            } elseif (!$allTasksCompleted && $currentStatus !== 'Отменён') {
+                $newStatus = 'Активен';
+            }
         }
         
         // Обновляем статус проекта, если нужно

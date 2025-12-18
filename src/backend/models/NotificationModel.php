@@ -9,7 +9,8 @@ class NotificationModel {
     }
 
     // Создать уведомление
-    public function createNotification($userId, $title, $message, $type = 'info', $relatedEntityType = null, $relatedEntityId = null) {
+    // $message — полный смысловой текст уведомления; для совместимости с БД дублируем его и в title
+    public function createNotification($userId, $message, $type = 'info', $relatedEntityType = null, $relatedEntityId = null) {
         $stmt = $this->pdo->prepare('
             INSERT INTO "notification" (user_id, title, message, type, related_entity_type, related_entity_id, is_read)
             VALUES (:user_id, :title, :message, :type, :related_entity_type, :related_entity_id, false)
@@ -17,7 +18,8 @@ class NotificationModel {
         ');
         $stmt->execute([
             'user_id' => $userId,
-            'title' => $title,
+            // Чтобы не ломать ограничение NOT NULL по столбцу title, дублируем текст
+            'title' => $message,
             'message' => $message,
             'type' => $type,
             'related_entity_type' => $relatedEntityType,
@@ -61,7 +63,7 @@ class NotificationModel {
     }
 
     // Отправить уведомления участникам проекта
-    public function notifyProjectParticipants($projectId, $title, $message, $type = 'info', $excludeUserId = null) {
+    public function notifyProjectParticipants($projectId, $message, $type = 'info', $excludeUserId = null) {
         // Получаем всех участников проекта (через задачи)
         $stmt = $this->pdo->prepare('
             SELECT DISTINCT u.id
@@ -77,13 +79,14 @@ class NotificationModel {
         $notifications = [];
         foreach ($participants as $userId) {
             if ($excludeUserId && $userId == $excludeUserId) continue;
-            $notifications[] = $this->createNotification($userId, $title, $message, $type, 'project', $projectId);
+            $notifications[] = $this->createNotification($userId, $message, $type, 'project', $projectId);
         }
         return $notifications;
     }
 
     // Отправить уведомление участникам задачи
-    public function notifyTaskParticipants($taskId, $title, $message, $type = 'info', $excludeUserId = null) {
+    // $excludeUserId — создатель задачи, $excludeExecutorId — исполнитель (чтобы, например, не дублировать уведомление о назначении)
+    public function notifyTaskParticipants($taskId, $message, $type = 'info', $excludeUserId = null, $excludeExecutorId = null) {
         // Получаем участников задачи
         $stmt = $this->pdo->prepare('
             SELECT DISTINCT u.id
@@ -97,7 +100,8 @@ class NotificationModel {
         $notifications = [];
         foreach ($participants as $userId) {
             if ($excludeUserId && $userId == $excludeUserId) continue;
-            $notifications[] = $this->createNotification($userId, $title, $message, $type, 'task', $taskId);
+            if ($excludeExecutorId && $userId == $excludeExecutorId) continue;
+            $notifications[] = $this->createNotification($userId, $message, $type, 'task', $taskId);
         }
         return $notifications;
     }

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notifications - Project Manager</title>
+    <script type="module" src="/src/main.js"></script>
+</head>
+
+<body>
+    <div class="wrapper">
+        <aside class="aside">
+            <div class="profile">
+                <div class="profile__img-box">
+                    <img src="src/assets/icons/profile.svg" alt="Profile photo" class="profile__img">
+                </div>
+                <div class="profile__info">
+                    <h2 class="profile__name">Bhargav Joshi & Team</h2>
+                    <p class="profile__email">bhargavjoshi1237@gmail.com</p>
+                </div>
+            </div>
+            <nav class="navigation">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="index.html" class="nav-link">
+                            <img src="src/assets/icons/dashboard.svg" alt="" loading="lazy" />
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="tasks.html" class="nav-link">
+                            <img src="src/assets/icons/tasks.svg" alt="" loading="lazy" />
+                            <p>Tasks</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="notifications.html" class="nav-link nav-link--active">
+                            <img src="src/assets/icons/warning.svg" alt="" loading="lazy" />
+                            <p>Notifications</p>
+                            <span class="nav-badge hidden" data-unread-count></span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <hr class="nav-divider" />
+
+            <section class="projects-section">
+                <nav class="navigation">
+                    <ul class="nav-list">
+                        <li class="nav-item">
+                            <a href="projects.html" class="nav-link">
+                                <img src="src/assets/icons/all-projects.svg" alt="" loading="lazy" />
+                                <p>All Projects</p>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+
+            </section>
+
+            <hr class="nav-divider" />
+
+            <nav class="navigation">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="users.html" class="nav-link">
+                            <img src="src/assets/icons/users.svg" alt="" loading="lazy" />
+                            <p>All Users</p>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="main">
+            <header class="main__header">
+                <h1>Notifications</h1>
+                <img class="logo" src="src/assets/icons/logo.svg" alt="" loading="lazy" />
+            </header>
+            <hr />
+            <div class="notifications-page">
+                <div class="notifications-header">
+                    <h2>Уведомления</h2>
+                    <button class="formButton" type="button" data-mark-all-read>Отметить все прочитанными</button>
+                </div>
+                <div class="notifications-list" data-notifications-container>
+                    <!-- Уведомления будут подгружены сюда -->
+                </div>
+            </div>
+        </main>
+    </div>
+    <div class="toast-container" data-toast-container></div>
+</body>
+
+</html>
+
+
+

@@ -5,6 +5,7 @@ import Task from "./modules/Task";
 import Project from "./modules/Project";
 import User from "./modules/User";
 import Dashboard from "./modules/Dashboard";
+import Notification from "./modules/Notification";
 import { initCreateForm } from './modules/Forms.js'
 
 // Инициализация авторизации
@@ -14,6 +15,7 @@ const auth = new Auth();
 let taskModuleInstance = null;
 let projectModuleInstance = null;
 let userModuleInstance = null;
+let notificationModuleInstance = null;
 
 // Ждем загрузки DOM и проверки авторизации
 document.addEventListener('DOMContentLoaded', async () => {
@@ -35,7 +37,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         userModuleInstance = new User(); // для инициализации users, проектов и задач
         projectModuleInstance = new Project();
         taskModuleInstance = new Task();
+        // Загружаем список задач для блока задач на дашборде
+        taskModuleInstance.loadAndRender();
         new Dashboard(); // Загружаем Dashboard с проектами и задачами
+        notificationModuleInstance = new Notification(); // Уведомления (тосты + счетчик)
         break;
       case 'tasks.html':
         taskModuleInstance = new Task();
@@ -43,6 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Для остальных модулей - только инициализация без рендера, если не нужны на этой странице
         projectModuleInstance = new Project();
         userModuleInstance = new User();
+        notificationModuleInstance = new Notification();
         break;
       case 'users.html':
         userModuleInstance = new User();
@@ -50,12 +56,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Для остальных модулей - только инициализация без рендера, если не нужны на этой странице
         taskModuleInstance = new Task();
         projectModuleInstance = new Project();
+        notificationModuleInstance = new Notification();
         break;
       case 'projects.html':
         projectModuleInstance = new Project();
         projectModuleInstance.loadAndRender(); // Загружаем все проекты на странице проектов
         // Для остальных модулей - только инициализация без рендера, если не нужны на этой странице
         taskModuleInstance = new Task();
+        userModuleInstance = new User();
+        notificationModuleInstance = new Notification();
+        break;
+      case 'notifications.html':
+        // Страница уведомлений
+        notificationModuleInstance = new Notification();
+        // Инициализируем базовые модули (для навигации и модалки)
+        taskModuleInstance = new Task();
+        projectModuleInstance = new Project();
         userModuleInstance = new User();
         break;
       default:

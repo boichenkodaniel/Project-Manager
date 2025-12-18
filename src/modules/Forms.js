@@ -76,12 +76,33 @@ async function openModal({ type, mode = 'create', data = null }) {
       });
 
       // Фильтруем только руководителей для Assigned by
-      const managers = users.filter(user => {
+      let managers = users.filter(user => {
         const role = user.role || '';
-        return role === 'Руководитель' || role === 'manager' ||
-          role.toLowerCase() === 'руководитель' ||
-          role === 'Администратор' || role === 'admin';
+        const lower = role.toLowerCase();
+        return (
+          role === 'Руководитель' ||
+          role === 'Руководитель проектов' ||
+          role === 'Администратор' ||
+          role === 'manager' ||
+          role === 'project manager' ||
+          role === 'admin' ||
+          lower === 'руководитель' ||
+          lower === 'руководитель проектов' ||
+          lower === 'администратор'
+        );
       });
+
+      // Гарантируем, что текущий пользователь (руководитель) попадёт в список managers
+      if (currentUser && currentUser.id && !managers.some(u => String(u.id) === String(currentUser.id))) {
+        managers = [
+          ...managers,
+          {
+            id: currentUser.id,
+            fullname: currentUser.fullname || 'Текущий пользователь',
+            role: currentUser.role || 'Руководитель'
+          }
+        ];
+      }
 
       populateSelect(form.querySelector('[name="taskProject"]'), projects, 'id', 'title');
 
@@ -178,12 +199,33 @@ async function fillForm(type, data) {
     });
 
     // Фильтруем только руководителей для Assigned by
-    const managers = users.filter(user => {
+    let managers = users.filter(user => {
       const role = user.role || '';
-      return role === 'Руководитель' || role === 'manager' ||
-        role.toLowerCase() === 'Руководитель' ||
-        role === 'Администратор' || role === 'admin';
+      const lower = role.toLowerCase();
+      return (
+        role === 'Руководитель' ||
+        role === 'Руководитель проектов' ||
+        role === 'Администратор' ||
+        role === 'manager' ||
+        role === 'project manager' ||
+        role === 'admin' ||
+        lower === 'руководитель' ||
+        lower === 'руководитель проектов' ||
+        lower === 'администратор'
+      );
     });
+
+    // Гарантируем наличие текущего пользователя в списке managers при редактировании
+    if (currentUser && currentUser.id && !managers.some(u => String(u.id) === String(currentUser.id))) {
+      managers = [
+        ...managers,
+        {
+          id: currentUser.id,
+          fullname: currentUser.fullname || 'Текущий пользователь',
+          role: currentUser.role || 'Руководитель'
+        }
+      ];
+    }
 
     // Наполняем select и сразу выставляем выбранное значение
     populateSelect(form.querySelector('[name="taskProject"]'), projects, 'id', 'title', data.taskProject);
