@@ -337,6 +337,14 @@ class TaskController {
             if ($updated) {
                 // После обновления получаем актуальную задачу для проверки
                 $updatedTask = $this->model->getTaskById($id);
+
+                // Нормализуем ключи TaskTo / TaskBy (могут приходить как taskto / taskby из БД)
+                if (isset($updatedTask['taskto']) && !isset($updatedTask['TaskTo'])) {
+                    $updatedTask['TaskTo'] = $updatedTask['taskto'];
+                }
+                if (isset($updatedTask['taskby']) && !isset($updatedTask['TaskBy'])) {
+                    $updatedTask['TaskBy'] = $updatedTask['taskby'];
+                }
                 error_log("Task after update - TaskTo: " . var_export($updatedTask['TaskTo'] ?? 'null', true) . " (type: " . gettype($updatedTask['TaskTo'] ?? null) . "), Status: " . ($updatedTask['Status'] ?? 'null'));
                 
                 // Обновляем статус проекта на основе статусов задач
@@ -419,14 +427,10 @@ class TaskController {
                     );
                 }
                 
-                // Уведомление исполнителю при успешном изменении задачи руководителем / админом
-                $shouldNotifyExecutor =
-                    isset($updatedTask['TaskTo']) &&
-                    $updatedTask['TaskTo'] &&
-                    $updatedTask['TaskTo'] != $_SESSION['user_id'] &&
-                    in_array($userRole, ['Руководитель', 'Руководитель проектов', 'Администратор'], true);
-
-                if ($shouldNotifyExecutor) {
+                // Уведомление исполнителю при успешном изменении задачи
+                // Делаем поведение максимально похожим на уведомление о назначении задачи:
+                // уведомление получает сам исполнитель, даже если он и редактировал задачу.
+                if (isset($updatedTask['TaskTo']) && $updatedTask['TaskTo']) {
                     $notificationModel = new NotificationModel();
                     $taskTitle = $updatedTask['Title'] ?? $updatedTask['title'] ?? 'Задача';
                     $notificationModel->createNotification(

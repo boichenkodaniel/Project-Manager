@@ -114,7 +114,7 @@ function addLogoutButton() {
     const logoutBtn = document.createElement('button');
     logoutBtn.className = 'logout-button';
     logoutBtn.textContent = 'Выйти';
-    logoutBtn.style.cssText = 'padding: 0.5rem 1rem; background: #921b4dff; color: white; border: none; border-radius: 5px; cursor: pointer;';
+    logoutBtn.style.cssText = 'padding: 0.5rem 1rem; background: #a12424ff; color: white; border: none; border-radius: 5px; cursor: pointer;margin-left:auto';
     logoutBtn.addEventListener('click', () => auth.logout());
     profile.appendChild(logoutBtn);
   }

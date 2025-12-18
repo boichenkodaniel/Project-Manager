@@ -9,7 +9,7 @@ class Database {
         $host = 'localhost';
         $dbname = 'Project-manager1';
         $username = 'postgres';
-        $password = 'postgres';
+        $password = 'pg123';
 
         try {
             $this->pdo = new PDO(
