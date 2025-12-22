@@ -512,6 +512,55 @@ body{
     font-size: 10px;
 }
 
+.report__content {
+  padding-block: 40px;
+  display: flex;
+  flex-direction: column;
+  row-gap: 30px;
+}
+
+.report__filters-row {
+  display: flex;
+  align-items: flex-end;
+  column-gap: 20px;
+}
+
+.report__filters-actions {
+  display: flex;
+  align-items: flex-end;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #191E24;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.report-table th,
+.report-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #3a434e;
+  font-size: 14px;
+}
+
+.report-table th {
+  background-color: #15191E;
+  font-weight: 500;
+}
+
+.report-table tr:last-child td {
+  border-bottom: none;
+}
+
+.report__empty {
+  margin-top: 16px;
+  font-size: 14px;
+  color: #B6B6B6;
+}
+
 .issues__content {
     display: flex;
     flex-direction: row;

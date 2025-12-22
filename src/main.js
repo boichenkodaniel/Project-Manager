@@ -6,6 +6,7 @@ import Project from "./modules/Project";
 import User from "./modules/User";
 import Dashboard from "./modules/Dashboard";
 import Notification from "./modules/Notification";
+import ReportModule from "./modules/Report";
 import { initCreateForm } from './modules/Forms.js'
 
 // Инициализация авторизации
@@ -73,6 +74,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         taskModuleInstance = new Task();
         projectModuleInstance = new Project();
         userModuleInstance = new User();
+        break;
+      case 'reports.html':
+        // Страница отчётов для руководителя
+        // Базовые модули для модалки и навигации
+        taskModuleInstance = new Task();
+        projectModuleInstance = new Project();
+        userModuleInstance = new User();
+        notificationModuleInstance = new Notification();
+        // Модуль отчётов
+        new ReportModule();
         break;
       default:
         console.warn('Неизвестная страница:', currentPage);

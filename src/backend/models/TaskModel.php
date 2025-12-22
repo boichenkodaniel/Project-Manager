@@ -183,4 +183,50 @@ public function getAllTasks() {
         $stmt->execute(['TaskTo' => $TaskTo]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Агрегированная статистика по исполнителям за период:
+     *  - задачи в исполнении (по дате начала)
+     *  - выполненные задачи (по дате окончания)
+     */
+    public function getExecutorTaskStats($startDate, $endDate) {
+        if (!$startDate || !$endDate) {
+            throw new InvalidArgumentException('Необходимо указать даты начала и окончания периода');
+        }
+
+        $sql = '
+            SELECT
+                u.id AS executor_id,
+                u.fullname AS executor_fullname,
+                SUM(
+                    CASE 
+                        WHEN t.Status IN (\'К выполнению\', \'В работе\', \'На проверке\')
+                             AND t.StartDate IS NOT NULL
+                             AND DATE(t.StartDate) BETWEEN :startDate AND :endDate
+                        THEN 1 ELSE 0
+                    END
+                ) AS in_progress_count,
+                SUM(
+                    CASE 
+                        WHEN t.Status = \'Выполнена\'
+                             AND t.EndDate IS NOT NULL
+                             AND DATE(t.EndDate) BETWEEN :startDate AND :endDate
+                        THEN 1 ELSE 0
+                    END
+                ) AS completed_count
+            FROM "User" u
+            LEFT JOIN "task" t ON t.TaskTo = u.id
+            WHERE u.role = \'Исполнитель\'
+            GROUP BY u.id, u.fullname
+            ORDER BY u.fullname ASC
+        ';
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            'startDate' => $startDate,
+            'endDate'   => $endDate,
+        ]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

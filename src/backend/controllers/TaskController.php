@@ -484,4 +484,34 @@ class TaskController {
         $tasks = $this->model->getTasksByExecutor($executorID);
         $this->json(['success' => true, 'data' => $tasks]);
     }
+
+    /**
+     * Агрегированная статистика по исполнителям за период:
+     *  - количество задач в исполнении
+     *  - количество выполненных задач
+     *
+     * Доступно только для ролей "Руководитель проектов" и "Администратор".
+     */
+    public function executorStats() {
+        AuthMiddleware::requireRole(['Руководитель проектов', 'Руководитель', 'Администратор']);
+
+        $startDate = $_GET['startDate'] ?? null;
+        $endDate   = $_GET['endDate'] ?? null;
+
+        if (!$startDate || !$endDate) {
+            $this->json([
+                'success' => false,
+                'error'   => 'Необходимо указать параметры startDate и endDate в формате YYYY-MM-DD'
+            ], 400);
+        }
+
+        try {
+            $stats = $this->model->getExecutorTaskStats($startDate, $endDate);
+            $this->json(['success' => true, 'data' => $stats]);
+        } catch (InvalidArgumentException $e) {
+            $this->json(['success' => false, 'error' => $e->getMessage()], 400);
+        } catch (Exception $e) {
+            $this->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
 }

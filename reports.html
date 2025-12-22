@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Notifications - Project Manager</title>
+    <title>Reports - Project Manager</title>
     <script type="module" src="/src/main.js"></script>
 </head>
 
@@ -35,14 +35,14 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="notifications.html" class="nav-link nav-link--active">
+                        <a href="notifications.html" class="nav-link">
                             <img src="src/assets/icons/warning.svg" alt="" loading="lazy" />
                             <p>Notifications</p>
                             <span class="nav-badge hidden" data-unread-count></span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="reports.html" class="nav-link">
+                        <a href="reports.html" class="nav-link nav-link--active">
                             <img src="src/assets/icons/compare.svg" alt="" loading="lazy" />
                             <p>Reports</p>
                         </a>
@@ -63,7 +63,6 @@
                         </li>
                     </ul>
                 </nav>
-
             </section>
 
             <hr class="nav-divider" />
@@ -79,26 +78,56 @@
                 </ul>
             </nav>
         </aside>
+
         <main class="main">
             <header class="main__header">
-                <h1>Notifications</h1>
+                <h1>Отчёты по задачам</h1>
                 <img class="logo" src="src/assets/icons/logo.svg" alt="" loading="lazy" />
             </header>
             <hr />
-            <div class="notifications-page">
-                <div class="notifications-header">
-                    <button class="formButton" type="button" data-mark-all-read>Отметить все прочитанными</button>
-                </div>
-                <div class="notifications-list" data-notifications-container>
-                    <!-- Уведомления будут подгружены сюда -->
-                </div>
+
+            <div class="report__content">
+                <section class="report__filters">
+                    <div class="report__filters-row">
+                        <div class="form-field">
+                            <label for="reportStart">Дата начала</label>
+                            <input type="date" id="reportStart" name="reportStart" data-report-start />
+                        </div>
+                        <div class="form-field">
+                            <label for="reportEnd">Дата окончания</label>
+                            <input type="date" id="reportEnd" name="reportEnd" data-report-end />
+                        </div>
+                        <div class="report__filters-actions">
+                            <button type="button" class="formButton" data-generate-report>
+                                Сформировать отчёт
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="report__table-section">
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Исполнитель</th>
+                                <th>Задач в исполнении</th>
+                                <th>Выполнено задач</th>
+                            </tr>
+                        </thead>
+                        <tbody data-report-table-body>
+                        </tbody>
+                    </table>
+                    <p class="report__empty hidden" data-report-empty>
+                        Нет данных для выбранного периода.
+                    </p>
+                </section>
             </div>
         </main>
     </div>
+
     <div class="toast-container" data-toast-container></div>
 </body>
 
 </html>
-
 
 

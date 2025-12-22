@@ -110,6 +110,17 @@ class Auth {
         if (usersLink && role !== 'Администратор') {
             usersLink.parentElement.style.display = 'none';
         }
+
+        // Скрываем пункт "Отчёты" для всех, кроме руководителей проектов и администраторов
+        const reportsLink = document.querySelector('a[href="reports.html"]');
+        if (
+            reportsLink &&
+            role !== 'Руководитель проектов' &&
+            role !== 'Руководитель' &&
+            role !== 'Администратор'
+        ) {
+            reportsLink.parentElement.style.display = 'none';
+        }
     }
 
     hasRole(allowedRoles) {
